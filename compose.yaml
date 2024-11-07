@@ -34,7 +34,7 @@ services:
     ports:
       - 8000:8000
     environment:
-      - DATABASE_URL= mysql://avnadmin:AVNS_2lZrrkAPjhxeX4tZcY_@mysql-dental-his-dental-his.d.aivencloud.com:20366/defaultdb?ssl-mode=REQUIRED # Reference to the .env file
+      - DATABASE_URL= ${DATABASE_URL} # Reference to the .env file
     # establish docker compose watch mode for the backend service
     develop:
       # specify the files to watch for changes
