@@ -57,7 +57,9 @@ model Diagnosis {
   diagnose                Dentist               @relation(fields: [dentistSsn], references: [dentistSSN], onDelete: Cascade)
   dentistSsn              String
   cost                    Float 
-  visit                   Visit[]
+  //visit                   Visit[]
+  visit                   Visit                 @relation(fields: [visitId], references: [id])
+  visitId                 Int
   radiologyImages         RadiologyImages[]
 }
 
