@@ -202,7 +202,7 @@ model Visit {
   serviceId               Int
   diagnoses               Diagnosis[]           // One visit can have multiple diagnoses
   consultations           Consultation[]        // One visit can have multiple consultations
-  procedures              Procedure[]
+  procedures              Procedure[] 
 }
 
 model Consultation {

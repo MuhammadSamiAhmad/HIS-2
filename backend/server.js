@@ -95,6 +95,9 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
+
+// app.use('/dentist', require('./routes/dentist'))
+
 //start server
 const PORT = process.env.PORT || 3307; //3307 is the mapped port on my device to access.
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
