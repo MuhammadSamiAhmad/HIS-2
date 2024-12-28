@@ -1,4 +1,26 @@
 const hl7 = require("hl7-standard");
+const axios = require("axios");
+const CryptoJS = require("crypto-js");
+
+
+const ENCRYPTION_KEY = "SecureKey123!@#";
+
+// Function to Encrypt HL7 Message
+function encryptMessage(message) {
+  return CryptoJS.AES.encrypt(message, ENCRYPTION_KEY).toString();
+}
+
+const sendHL7Message = async (endpoint, message, messageType) => {
+  try {
+    const response = await axios.post(`http://localhost:3001/${endpoint}`, {encryptedMessage: message, messageType:messageType});
+    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
+  } catch (error) {
+    console.error(
+      `❌ [${messageType}] Failed to send message to /${endpoint}:`,
+      error.message
+    );
+  }
+};
 
 // Utility to format timestamps for HL7 messages
 function formatHL7Timestamp(date = new Date()) {
@@ -8,9 +30,10 @@ function formatHL7Timestamp(date = new Date()) {
   )}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
 
-
-function createAdtA04Message(data) {
-  const message = new HL7();
+//ADT^A04 Message
+const createAdtA04Message = async (req, res) =>{
+  const {data} = req.body
+  let message = new hl7();
   const timestamp = formatHL7Timestamp();
 
   // MSH Segment
@@ -67,61 +90,102 @@ function createAdtA04Message(data) {
     });
   }
 
-  return message.toString();
-}
+  message = message.build();
+  console.log(message)
+  const encryptedMessage = encryptMessage(message);
+  console.log(encryptedMessage)
 
+  try {
+    // Assuming sendHL7Message is an async function that sends the HL7 message
+    await sendHL7Message("adt", encryptedMessage, "ADT^A04");
+
+    // Send success response
+    return res.status(200).json({
+      success: true,
+      message: "HL7 ADT^A04 message sent successfully",
+      data: encryptedMessage,
+    });
+  } catch (error) {
+    // Send failure response if something goes wrong
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send HL7 ADT^A04 message",
+      error: error.message,
+    });
+  }
+}
 
 // SCH^S12 Message
-function createSchS12Message(data) {
-  const message = new hl7.Message();
-
+const createSchS12Message = async (req, res) =>{
+  const {data} = req.body
+  let hl7 = new hl7();
+  const [messageCode, triggerEvent] = data.hl7MessageType
   // MSH Segment
-  message.addSegment("MSH");
-  message.setField("MSH.1", "|");
-  message.setField("MSH.2", "^~\\&");
-  message.setField("MSH.3", data.sendingFacility); //SanOris
-  message.setField("MSH.4", data.sendingFacilityApplication); //Dental Clinic
-  message.setField("MSH.5", data.receivingFacility);
-  message.setField("MSH.6", data.receivingFacilityApplication);
-  message.setField("MSH.7", Date.now().toString());
-  message.setField("MSH.9", data.hl7MessageType);
-  message.setField("MSH.10", Date.now().toString());
-  message.setField("MSH.11", "P"); //HL7 version
-  message.setField("MSH.12", "2.5"); //HL7 version
+  hl7.createSegment("MSH");
+  hl7.set("MSH",{
+  "MSH.1": "|",
+  "MSH.2": "^~\\&",
+  "MSH.3": data.sendingFacility, //SanOris
+  "MSH.4": data.sendingFacilityApplication, //Dental Clinic
+  "MSH.5": data.receivingFacility,
+  "MSH.6": data.receivingFacilityApplication,
+  "MSH.7": Date.now().toString(),
+  "MSH.9": {messageCode, triggerEvent},
+  "MSH.10": Date.now().toString(),
+  "MSH.11": "P", //HL7 version
+  "MSH.12": "2.5", //HL7 version
+  })
 
   // SCH Segment
-  message.addSegment("SCH");
-  message.setField("SCH.1", data.appointmentID);
-  message.setField("SCH.2", data.startTime);
-  message.setField("SCH.3", data.endTime);
-  message.setField("SCH.4", data.duration);
-  message.setField("SCH.5", data.practitionerFName);
-  message.setField("SCH.6", data.appointmentType);
-  message.setField("SCH.7", data.status);
+  hl7.createSegment("SCH");
+  hl7.set('SCH',{
+  "SCH.1": data.appointmentID,
+  "SCH.2": data.startTime,
+  "SCH.3": data.endTime,
+  "SCH.4": data.duration,
+  "SCH.5": data.practitionerFName,
+  "SCH.6": data.appointmentType,
+  "SCH.7": data.status,
+})
 
   // PID Segment
-  message.addSegment("PID");
-  message.setField("PID.1", `${data.patientID}^^^${data.sendingFacility}`);
-  message.setField("PID.2", `${data.lName}^${data.fName}`);
-  message.setField("PID.3", data.dob);
-  message.setField("PID.4", data.gender);
+  hl7.createSegment("PID",{
+  "PID.1": `${data.patientID}^^^${data.sendingFacility}`,
+  "PID.2": `${data.lName}^${data.fName}`,
+  "PID.3": data.dob,
+  "PID.4": data.gender,})
 
   // AIG Segment
-  message.addSegment("AIG");
-  message.setField(
-    "AIG.1",
-    `${data.practitionerFName}^${data.practitionerLName}`
-  );
-  message.setField("AIG.2", data.practitionerId);
-  message.setField("AIG.3", data.appointmentType);
+  hl7.createSegment("AIG",{
+    "AIG.1": `${data.practitionerFName}^${data.practitionerLName}`,
+    "AIG.2": data.practitionerId,
+    "AIG.3": data.appointmentType,})
 
-  return message.toString();
+  hl7 = hl7.build();
+  console.log(message);
+  const encryptedMessage = encryptMessage(message);
+  console.log(encryptedMessage);
+
+  try {
+    await sendHL7Message("sch", encryptedMessage, "SCH^S12");
+    return res.status(200).json({
+      success: true,
+      message: "HL7 SCH^S12 message sent successfully",
+      data: encryptedMessage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send HL7 SCH^S12 message",
+      error: error.message,
+    });
+  }
 }
 
-
-
-function createOrmO01Message(data) {
-  const message = new HL7();
+//ORM^O01 Message
+const createOrmO01Message = async (req, res) =>{
+  const {data} = req.body
+  let message = new hl7();
 
   // MSH Segment
   const timestamp = formatHL7Timestamp();
@@ -161,29 +225,47 @@ function createOrmO01Message(data) {
   message.set("ORC", {
     "ORC.1": data.orderControlCode, // NW, CA
     "ORC.2": data.orderID,
-    "ORC.3": data.fillerOrderID,
-    "ORC.9": formatHL7Timestamp(data.orderDate),
+    "ORC.3": data.fillerOrderNumber,
+    "ORC.9": data.orderDate,
     "ORC.12": data.orderingProvider || "",
   });
 
   // OBR Segment
   message.createSegment("OBR");
   message.set("OBR", {
-    "OBR.1": data.testType,
+    "OBR.1": data.testName,
     "OBR.2": data.orderID,
-    "OBR.3": `L${data.fillerOrderID}`,
+    "OBR.3": `L${data.fillerOrderNumber}`,
     "OBR.4": `${data.testCode}^${data.testName}`,
-    "OBR.5": formatHL7Timestamp(data.orderDate),
-    "OBR.6": data.provider,
+    "OBR.5": data.orderDate,
+    "OBR.6": data.orderingProvider,
   });
 
-  return message.toString();
+  message = message.build();
+  console.log(message);
+  const encryptedMessage = encryptMessage(message);
+  console.log(encryptedMessage);
+
+  try {
+    await sendHL7Message("orm", encryptedMessage, "ORM^O01");
+    return res.status(200).json({
+      success: true,
+      message: "HL7 ORM^O01 message sent successfully",
+      data: encryptedMessage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send HL7 ORM^O01 message",
+      error: error.message,
+    });
+  }
 }
 
-
-
-function createOruR01Message(data) {
-  const message = new HL7();
+//ORU^R01 Message
+const createOruR01Message = async (req, res) =>{
+  const {data} = req.body
+  let message = new hl7();
 
   // MSH Segment
   const timestamp = formatHL7Timestamp();
@@ -203,7 +285,7 @@ function createOruR01Message(data) {
   });
 
   // PID Segment
-  message.CreateSegment("PID");
+  message.createSegment("PID");
   message.set("PID", {
     "PID.1": "1",
     "PID.2": `${data.patientID}^^^${data.sendingFacility}`,
@@ -219,18 +301,18 @@ function createOruR01Message(data) {
   });
 
   // OBR Segment
-  message.CreateSegment("OBR");
+  message.createSegment("OBR");
   message.set("OBR", {
-    "OBR.1": data.testType,
+    "OBR.1": data.testName,
     "OBR.2": data.orderID,
     "OBR.3": `L${data.fillerOrderID}`,
     "OBR.4": `${data.testCode}^${data.testName}`,
-    "OBR.5": data.dateTime,
-    "OBR.6": data.provider,
+    "OBR.5": data.specimenReceivedDateTime,
+    "OBR.6": data.orderingProvider,
   });
 
   // OBX Segment
-  message.CreateSegment("OBX");
+  message.createSegment("OBX");
   message.set("OBX", {
     "OBX.2": data.valueType, // NE, CE, ST
     "OBX.3": `${data.code}^${data.description}^${data.codingSystem}`,
@@ -238,7 +320,27 @@ function createOruR01Message(data) {
     "OBX.11": data.resultStatus, // Final, Preliminary
   });
 
-  return message.toString();
+  message = message.build();
+  // message = message.toString();
+
+  console.log(message);
+  const encryptedMessage = encryptMessage(message);
+  console.log(encryptedMessage);
+
+  try {
+    await sendHL7Message("oru", encryptedMessage, "ORU^R01");
+    return res.status(200).json({
+      success: true,
+      message: "HL7 ORU^R01 message sent successfully",
+      data: encryptedMessage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send HL7 ORU^R01 message",
+      error: error.message,
+    });
+  }
 }
 
 

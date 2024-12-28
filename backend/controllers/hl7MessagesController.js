@@ -97,7 +97,6 @@ AIG|${data.practitionerFName}^${data.practitionerLName}|${data.practitionerId}|$
   }
 };
 
-
 // ORM^O01 Message
 const createOrmO01Message = async (req, res) => {
   const { data } = req.body;
@@ -129,62 +128,41 @@ OBR|${data.testName}|${data.orderID}|L${data.fillerOrderNumber}|${data.testCode}
   }
 };
 
-
 // ORU^R01 Message
-function createOruR01Message(data) {
-  const message = new hl7.Message();
-
-  // MSH Segment
+const createOruR01Message = async (req, res) => {
+  const { data } = req.body;
   const timestamp = formatHL7Timestamp();
-  message.addSegment("MSH");
-  message.setField("MSH.1", "|");
-  message.setField("MSH.2", "^~\\&");
-  message.setField("MSH.3", data.sendingFacility); //SanOris
-  message.setField("MSH.4", data.sendingFacilityApplication); //Dental Clinic
-  message.setField("MSH.5", data.receivingFacility); //Lab or whatever App Name
-  message.setField("MSH.6", data.receivingFacilityApplication); //lab
-  message.setField("MSH.7", timestamp); // date auto-generated at once
-  message.setField("MSH.9", data.hl7MessageType); //ADT
-  message.setField("MSH.10", data.patientID.toString().reverse());
-  message.setField("MSH.11", "P"); //HL7 version
-  message.setField("MSH.12", "2.5"); //HL7 Version
 
-  // PID Segment
-  message.addSegment("PID");
-  message.setField("PID.1", "1");
-  message.setField("PID.2", `${data.patientID}^^^${data.sendingFacility}`);
-  message.setField("PID.5", `${data.lName}^${data.fName}^${data.mName || ""}`);
-  message.setField("PID.7", data.dob);
-  message.setField("PID.8", data.gender);
-  message.setField("PID.11", data.address);
-  message.setField("PID.13", data.phone);
+  let message = 
+`MSH|^~\\&|${data.sendingFacility}|${data.sendingFacilityApplication}|${data.receivingFacility}|${data.receivingFacilityApplication}|${timestamp}||${data.hl7MessageType}|${data.patientID.toString().split("").reverse().join("")}|P|2.5
+PID|1|${data.patientID}^^^${data.sendingFacility}|${data.lName}^${data.fName}^${data.mName || ""}|${data.dob}|${data.gender}|${data.address}|${data.phone}
+OBR|${data.testName}|${data.orderID}|L${data.fillerOrderID}|${data.testCode}^${data.testName}|${data.requestedDateTime}|${data.specimenReceivedDateTime || ""}|${data.orderingProvider}
+OBX|${data.valueType}|${data.code}^${data.description}^${data.codingSystem}|${data.observation}|${data.resultStatus}`;
 
-  // OBR Segment
-  message.addSegment("OBR");
-  message.setField("OBR.1", data.testType);
-  message.setField("OBR.2", data.orderID);
-  message.setField("OBR.3", `L${data.fillerOrderID}`);
-  message.setField("OBR.4", `${data.testCode}^${data.testName}`);
-  message.setField("OBR.5", data.requestedDateTime);
-  message.setField("OBR.5", data.specimenReceivedDateTime || "");
-  message.setField("OBR.5", data.orderingProvider);
+  console.log(message);
+  const encryptedMessage = encryptMessage(message);
+  console.log(encryptedMessage);
 
-  // OBX Segment
-  message.addSegment("OBX");
-  message.setField("OBX.2", data.valueType); // NE, CE, ST
-  message.setField(
-    "OBX.3",
-    `${data.code}^${data.description}^${data.codingSystem}`
-  );
-  message.setField("OBX.5", data.observation);
-  message.setField("OBX.11", data.resultStatus); //Final Preliminary
+  try {
+    await sendHL7Message("oru", encryptedMessage, "ORU^R01");
+    return res.status(200).json({
+      success: true,
+      message: "HL7 ORU^R01 message sent successfully",
+      data: encryptedMessage,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send HL7 ORU^R01 message",
+      error: error.message,
+    });
+  }
+};
 
-  return message.toString();
-}
 
 module.exports = {
   createAdtA04Message,
   createSchS12Message,
   createOrmO01Message,
-  // createOruR01Message,
+  createOruR01Message,
 };
