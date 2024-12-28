@@ -1,71 +1,102 @@
 import SlidingDialog from "../../components/UI/SlidingDialog";
 import AddIcon from "../../assets/images/add-1--expand-cross-buttons-button-more-remove-plus-add-+-mathematics-math.svg";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { FaCalendarAlt, FaStethoscope } from "react-icons/fa";
+import ScrollArea from "../../components/UI/ScrollArea";
 
-const PatientReservationForm = () => {
+// Define validation schema with Zod
+const schema = z.object({
+  doctor: z.string().nonempty("Consulting Doctor is required"),
+  dateOfAppointment: z
+    .string()
+    .refine((date) => new Date(date).toString() !== "Invalid Date", {
+      message: "A valid Date of Appointment is required",
+    }),
+  visitReason: z.string().nonempty("Visit Reason is required"),
+});
+
+type FormFields = z.infer<typeof schema>;
+
+export default function BookAppointment() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormFields>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
+    console.log(data);
+    alert("Appointment successfully booked!");
+  };
+
   return (
     <SlidingDialog
       trigger={
         <button className="w-fit py-2 px-4 flex flex-row gap-3 items-center bg-callToAction text-white rounded-md -mt-8 mb-5 mr-16 hover:bg-callToAction-900">
-          <img className="size-4" src={AddIcon} alt="" /> New Reservation
+          <img className="size-4" src={AddIcon} alt="" /> Book a Reservation
         </button>
       }
-      title="Reservation #Res0235"
+      title="Book Reservation"
     >
-      <div className="flex flex-col gap-4 font-manrope">
-        {/* Patient Info */}
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Patient</span>
-          <div className="flex gap-2">
-            <span className="text-gray-600">Muhammed Sami</span>
-            <span className="text-gray-400">#Pat0905</span>
-          </div>
-        </div>
-
-        {/* Date & Time */}
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Date & Time</span>
-          <span className="text-gray-600">2024/01/31, 15:00</span>
-        </div>
-
-        {/* Category */}
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Category</span>
-          <span className="text-gray-600">Surgery</span>
-        </div>
-
-        {/* Treatment */}
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Treatment</span>
-          <span className="text-gray-600">Tooth Filling</span>
-        </div>
-
-        {/* Medications */}
-        <div className="flex flex-col gap-2">
-          <span className="font-medium">Medications</span>
-          <div className="ml-4 flex flex-col gap-1">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Medicine</span>
-              <span className="text-gray-600">Aspirin</span>
+      <ScrollArea>
+        <div className="font-manrope w-full max-w-md mx-auto mt-2">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="relative mb-4">
+              <FaStethoscope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                {...register("doctor")}
+                type="text"
+                placeholder="Consulting Doctor"
+                className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
+              />
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Dosage</span>
-              <span className="text-gray-600">50 ml</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Frequency</span>
-              <span className="text-gray-600">3 Times per week</span>
-            </div>
-          </div>
-        </div>
+            {errors.doctor && (
+              <div className="text-red-500 -mt-2 mb-2">
+                {errors.doctor.message}
+              </div>
+            )}
 
-        {/* Payment Status */}
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Payment</span>
-          <span className="text-green-600">Paid</span>
+            <div className="relative mb-4">
+              <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                {...register("dateOfAppointment")}
+                type="date"
+                className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
+              />
+            </div>
+            {errors.dateOfAppointment && (
+              <div className="text-red-500 -mt-2 mb-2">
+                {errors.dateOfAppointment.message}
+              </div>
+            )}
+
+            <div className="relative mb-4">
+              <textarea
+                {...register("visitReason")}
+                placeholder="Reason for Visit"
+                className="w-full bg-Silver-6  p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
+              />
+            </div>
+            {errors.visitReason && (
+              <div className="text-red-500 -mt-2 mb-2">
+                {errors.visitReason.message}
+              </div>
+            )}
+            <button
+              type="submit"
+              className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary-dark disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Booking..." : "Book Appointment"}
+            </button>
+          </form>
         </div>
-      </div>
+      </ScrollArea>
     </SlidingDialog>
   );
-};
-
-export default PatientReservationForm;
+}

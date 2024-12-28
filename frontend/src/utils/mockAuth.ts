@@ -40,7 +40,10 @@ export const MOCK_USERS = {
 export const signInUser = async (
   email: string,
   password: string
-): Promise<{ user: any; token: string }> => {
+): Promise<{
+  user: Omit<(typeof MOCK_USERS)[keyof typeof MOCK_USERS], "password">;
+  token: string;
+}> => {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800));
 
