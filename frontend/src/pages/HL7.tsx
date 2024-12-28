@@ -9,30 +9,22 @@ export default function HL7() {
   const tabs = [
     {
       label: "ADT Form",
-      value: "adt",
-      content: (
-        <>
-          <ADTForm />
-        </>
-      ),
+      value: "ADT^A04",
+      content: <ADTForm messageType="ADT^A04" />,
     },
     {
       label: "ORM^O01  Order Message",
-      value: "orm",
-      content: (
-        <>
-          <LabTestOrderForm />
-        </>
-      ),
+      value: "ORM^O01",
+      content: <LabTestOrderForm />,
     },
     {
       label: "SCH^S12 Appointment Booking",
-      value: "sch",
+      value: "SCH^S12",
       content: <AppointmentBookingForm />,
     },
     {
       label: "ORU^R01  Test Results",
-      value: "oru",
+      value: "ORU^R01",
       content: (
         <ScrollArea>
           <TestResultsForm />
