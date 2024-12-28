@@ -8,19 +8,19 @@ const {
 const router = express.Router();
 const axios = require("axios");
 
-const sendHL7Message = async (endpoint, message, messageType) => {
-  try {
-    const response = await axios.post(`http://localhost:3001/${endpoint}`, {
-      hl7Message: message,
-    });
-    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
-  } catch (error) {
-    console.error(
-      `❌ [${messageType}] Failed to send message to /${endpoint}:`,
-      error.message
-    );
-  }
-};
+// const sendHL7Message = async (endpoint, message, messageType) => {
+//   try {
+//     const response = await axios.post(`http://localhost:3001/${endpoint}`, {
+//       hl7Message: message, 
+//     });
+//     console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
+//   } catch (error) {
+//     console.error(
+//       `❌ [${messageType}] Failed to send message to /${endpoint}:`,
+//       error.message
+//     );
+//   }
+// };
 
 // Example Data
 const exampleData = {

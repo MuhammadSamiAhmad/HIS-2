@@ -1,20 +1,9 @@
 const hl7 = require("hl7-standard");
 const axios = require("axios");
+const CryptoJS = require("crypto-js");
 
+const ENCRYPTION_KEY = "SecureKey123!@#";
 
-const sendHL7Message = async (endpoint, message, messageType) => {
-  try {
-    const response = await axios.post(`http://localhost:3001/${endpoint}`, {
-      hl7Message: message,
-    });
-    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
-  } catch (error) {
-    console.error(
-      `❌ [${messageType}] Failed to send message to /${endpoint}:`,
-      error.message
-    );
-  }
-};
 // Utility to format timestamps for HL7 messages
 function formatHL7Timestamp(date = new Date()) {
   const pad = (num) => num.toString().padStart(2, "0");
@@ -23,37 +12,65 @@ function formatHL7Timestamp(date = new Date()) {
   )}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
 
+// Function to Encrypt HL7 Message
+function encryptMessage(message) {
+  return CryptoJS.AES.encrypt(message, ENCRYPTION_KEY).toString();
+}
+
+const sendHL7Message = async (endpoint, message, messageType) => {
+  try {
+    const response = await axios.post(`http://localhost:3001/${endpoint}`, {encryptedMessage: message, messageType:messageType});
+    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
+  } catch (error) {
+    console.error(
+      `❌ [${messageType}] Failed to send message to /${endpoint}:`,
+      error.message
+    );
+  }
+};
+
 // ADT^A04 Message
 const createAdtA04Message = async (req, res) =>{
   const {data} = req.body
   const timestamp = formatHL7Timestamp();
 
-  const message = [
-    ["MSH", "|", "^~\\&", data.sendingFacility, data.sendingFacilityApplication, data.receivingFacility, data.receivingFacilityApplication, timestamp, "", data.hl7MessageType, data.patientID.toString().split("").reverse().join(""), "P", "2.5"],
-    ["PID", "1", `${data.patientID}^^^${data.sendingFacility}`, "", "", `${data.lName}^${data.fName}^${data.mName || ""}`, "", data.dob, data.gender, "", "", data.address, "", data.phone],
-    ["PV1", "1", data.patientClass || "O", "", "", "", data.attendingPhysician || ""],
-  ];
+  // const message = [
+  //   ["MSH", "|", "^~\\&", data.sendingFacility, data.sendingFacilityApplication, data.receivingFacility, data.receivingFacilityApplication, timestamp, "", data.hl7MessageType, data.patientID.toString().split("").reverse().join(""), "P", "2.5"],
+  //   ["PID", "1", `${data.patientID}^^^${data.sendingFacility}`, "", "", `${data.lName}^${data.fName}^${data.mName || ""}`, "", data.dob, data.gender, "", "", data.address, "", data.phone],
+  //   ["PV1", "1", data.patientClass || "O", "", "", "", data.attendingPhysician || ""],
+  // ];
 
-  if (data.allergy) {
-    message.push([
-      "AL1",
-      "1",
-      data.allergy.type || "",
-      data.allergy.severity || "",
-      data.allergy.reaction || ""
-    ]);
-  }
-  const adtMessage = message.toString();
+  // if (data.allergy) {
+  //   message.push([
+  //     "AL1",
+  //     "1",
+  //     data.allergy.type || "",
+  //     data.allergy.severity || "",
+  //     data.allergy.reaction || ""
+  //   ]);
+  // }
+
+  let message =
+  `MSH|^~\\&|${data.sendingFacility}|${data.sendingFacilityApplication}|${data.receivingFacility}|${data.receivingFacilityApplication}|${timestamp}||${data.hl7MessageType}|${data.patientID.toString().split("").reverse().join("")}|P|2.5 PID|1|${data.patientID}^^^${data.sendingFacility}||||${data.lName}^${data.fName}^${data.mName || ""}||||${data.dob}|${data.gender}||||${data.address}||||${data.phone}
+  PV1|1|${data.patientClass || "O"}||||||${data.attendingPhysician || ""}`;
+
+if (data.allergy) {
+  message += `AL1|1|${data.allergy.type || ""}|${data.allergy.severity || ""}|${data.allergy.reaction || ""}`;
+}
+  // const adtMessage = message.toString();
+  console.log(message)
+  const encryptedMessage = encryptMessage(message);
+  console.log(encryptedMessage)
 
   try {
     // Assuming sendHL7Message is an async function that sends the HL7 message
-    await sendHL7Message("adt", adtMessage, "ADT^A04");
+    await sendHL7Message("adt", encryptedMessage, "ADT^A04");
 
     // Send success response
     return res.status(200).json({
       success: true,
       message: "HL7 ADT^A04 message sent successfully",
-      data: adtMessage,
+      data: encryptedMessage,
     });
   } catch (error) {
     // Send failure response if something goes wrong
