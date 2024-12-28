@@ -39,8 +39,8 @@ const exampleData = {
 };
 
 router.route('/adt').post(createAdtA04Message);
-// router.route('/sch').post(createSchS12Message);
-// router.route('/orm').post(createOrmO01Message);
+router.route('/sch').post(createSchS12Message);
+router.route('/orm').post(createOrmO01Message);
 // router.route('/oru').post(createOruR01Message);
 
 
