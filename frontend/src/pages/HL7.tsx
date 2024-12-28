@@ -10,24 +10,37 @@ export default function HL7() {
     {
       label: "ADT Form",
       value: "ADT^A04",
-      content: <ADTForm messageType="ADT^A04" />,
+      content: (
+        <ScrollArea>
+          <ADTForm messageType="ADT^A04" />
+        </ScrollArea>
+      ),
     },
     {
       label: "ORM^O01  Order Message",
       value: "ORM^O01",
-      content: <LabTestOrderForm />,
+
+      content: (
+        <ScrollArea>
+          <LabTestOrderForm messageType="ORM^O01" />
+        </ScrollArea>
+      ),
     },
     {
       label: "SCH^S12 Appointment Booking",
       value: "SCH^S12",
-      content: <AppointmentBookingForm />,
+      content: (
+        <ScrollArea>
+          <AppointmentBookingForm messageType="SCH^S12" />
+        </ScrollArea>
+      ),
     },
     {
       label: "ORU^R01  Test Results",
       value: "ORU^R01",
       content: (
         <ScrollArea>
-          <TestResultsForm />
+          <TestResultsForm messageType="ORU^R01" />
         </ScrollArea>
       ),
     },

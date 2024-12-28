@@ -6,11 +6,25 @@ import { patients } from "../../utils/mockHL7Data";
 
 const schema = z.object({
   patient: z.string().nonempty("Please select a patient"),
+  sendingFacility: z.string().nonempty("Sending facility is required"),
+  sendingFacilityApplication: z
+    .string()
+    .nonempty("Sending facility application is required"),
+  receivingFacility: z.string().nonempty("Receiving facility is required"),
+  receivingFacilityApplication: z
+    .string()
+    .nonempty("Receiving facility application is required"),
+  hl7MessageType: z.string().nonempty("HL7 message type is required"),
+  patientID: z.string().nonempty("Patient ID is required"),
+  fName: z.string().nonempty("First name is required"),
+  lName: z.string().nonempty("Last name is required"),
+  dob: z.string().nonempty("Date of birth is required"),
+  gender: z.string().nonempty("Gender is required"),
+  address: z.string().nonempty("Address is required"),
+  phone: z.string().nonempty("Phone number is required"),
   // OBR Segment
-  obrSetId: z.string().nonempty("Set ID is required"),
-  placerOrderNumber: z.string().nonempty("Placer Order Number is required"),
-  fillerOrderNumber: z.string().optional(),
-  universalServiceId: z.string().nonempty("Universal Service ID is required"),
+  orderID: z.string().nonempty("Set ID is required"),
+  fillerOrderID: z.string().optional(),
   testCode: z.string().nonempty("Test Code is required"),
   testName: z.string().nonempty("Test Name is required"),
   requestedDateTime: z.string().nonempty("Requested Date/Time is required"),
@@ -18,22 +32,21 @@ const schema = z.object({
   orderingProvider: z.string().nonempty("Ordering Provider is required"),
 
   // OBX Segment
-  obxSetId: z.string().nonempty("Set ID is required"),
   valueType: z.string().nonempty("Value Type is required"),
-  observationIdentifier: z
-    .string()
-    .nonempty("Observation Identifier is required"),
   code: z.string().nonempty("Code is required"),
   description: z.string().nonempty("Description is required"),
   codingSystem: z.string().nonempty("Coding System is required"),
-  observationValue: z.string().nonempty("Observation Value is required"),
-  units: z.string().nonempty("Units are required"),
+  observation: z.string().nonempty("Observation Value is required"),
   resultStatus: z.string().nonempty("Result Status is required"),
 });
 
 type FormFields = z.infer<typeof schema>;
 
-const TestResultsForm = () => {
+interface ORUFormProps {
+  messageType: string;
+}
+
+const TestResultsForm = ({ messageType }: ORUFormProps) => {
   const {
     register,
     handleSubmit,
@@ -41,27 +54,49 @@ const TestResultsForm = () => {
     formState: { errors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      sendingFacility: "SanOris",
+      sendingFacilityApplication: "Dental Clinic",
+      hl7MessageType: messageType,
+    },
   });
 
   const onSubmit: SubmitHandler<FormFields> = (data) => {
-    const selectedPatient = patients.find((p) => `${p.id}` === data.patient);
-    console.log("Submitted HL7 ORU^R01 Test Results Form:", {
-      ...data,
-      patientDetails: selectedPatient,
-    });
+    console.log("Submitted data:", data);
+  };
+  const handlePatientSelect = (patientId: string | undefined) => {
+    if (!patientId) {
+      console.log("No patient selected");
+      return;
+    }
+
+    const selectedPatient = patients.find((p) => `${p.id}` === patientId);
+    if (selectedPatient) {
+      console.log("Setting patient data:", selectedPatient);
+      setValue(
+        "patient",
+        `${patientId}${selectedPatient.firstName}${selectedPatient.lastName}`
+      );
+      setValue("patientID", patientId);
+      setValue("fName", selectedPatient.firstName);
+      setValue("lName", selectedPatient.lastName);
+      setValue("dob", selectedPatient.dateOfBirth);
+      setValue("address", selectedPatient.address);
+      setValue("phone", selectedPatient.phone);
+      setValue("gender", selectedPatient.gender);
+    }
   };
 
   const valueTypeOptions = [
-    { label: "Numeric (NM)", value: "Numeric (NM)" },
-    { label: "Coded (CE)", value: "Coded (CE)" },
-    { label: "String (ST)", value: "String (ST)" },
+    { label: "Numeric (NM)", value: "NM" },
+    { label: "Coded (CE)", value: "CE" },
+    { label: "String (ST)", value: "ST" },
   ];
 
   const resultStatusOptions = [
     { label: "Final (F)", value: "F" },
     { label: "Preliminary (P)", value: "P" },
   ];
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -75,7 +110,7 @@ const TestResultsForm = () => {
             label: `${p.id} - ${p.patientName}`,
             id: String(p.id),
           }))}
-          onChange={(_, value) => setValue("patient", value?.id || "")}
+          onChange={(_, value) => handlePatientSelect(value?.id)}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -86,44 +121,114 @@ const TestResultsForm = () => {
           )}
         />
       </div>
+      {/* Facility Information */}
+      <div>
+        <TextField
+          {...register("sendingFacility")}
+          label="Sending Facility"
+          fullWidth
+          error={!!errors.sendingFacility}
+          helperText={errors.sendingFacility?.message}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("sendingFacilityApplication")}
+          label="Sending Facility Application"
+          fullWidth
+          error={!!errors.sendingFacilityApplication}
+          helperText={errors.sendingFacilityApplication?.message}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("receivingFacility")}
+          label="Receiving Facility"
+          fullWidth
+          error={!!errors.receivingFacility}
+          helperText={errors.receivingFacility?.message}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("receivingFacilityApplication")}
+          label="Receiving Facility Application"
+          fullWidth
+          error={!!errors.receivingFacilityApplication}
+          helperText={errors.receivingFacilityApplication?.message}
+        />
+      </div>
+      {/* Patient Information - Read Only */}
+      <div>
+        <TextField
+          {...register("fName")}
+          label="First Name"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("lName")}
+          label="Last Name"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("dob")}
+          label="Date of Birth"
+          type="date"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("gender")}
+          label="Gender"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("address")}
+          InputLabelProps={{ shrink: true }}
+          label="Address"
+          fullWidth
+        />
+      </div>
+      <div>
+        <TextField
+          {...register("phone")}
+          label="Phone Number"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+      </div>
+
       {/* OBR Segment */}
       <div className="col-span-2">
         <h2 className="text-lg font-bold">Observation Request</h2>
       </div>
       <div>
         <TextField
-          {...register("obrSetId")}
-          label="Set ID"
+          {...register("orderID")}
+          label="Order ID"
           fullWidth
-          error={!!errors.obrSetId}
-          helperText={errors.obrSetId?.message}
+          error={!!errors.orderID}
+          helperText={errors.orderID?.message}
         />
       </div>
       <div>
         <TextField
-          {...register("placerOrderNumber")}
-          label="Placer Order Number"
-          fullWidth
-          error={!!errors.placerOrderNumber}
-          helperText={errors.placerOrderNumber?.message}
-        />
-      </div>
-      <div>
-        <TextField
-          {...register("fillerOrderNumber")}
+          {...register("fillerOrderID")}
           label="Filler Order Number (Optional)"
           fullWidth
-          error={!!errors.fillerOrderNumber}
-          helperText={errors.fillerOrderNumber?.message}
-        />
-      </div>
-      <div>
-        <TextField
-          {...register("universalServiceId")}
-          label="Universal Service ID"
-          fullWidth
-          error={!!errors.universalServiceId}
-          helperText={errors.universalServiceId?.message}
+          error={!!errors.fillerOrderID}
+          helperText={errors.fillerOrderID?.message}
         />
       </div>
       <div>
@@ -181,36 +286,21 @@ const TestResultsForm = () => {
         <h2 className="text-lg font-bold">Observation Results</h2>
       </div>
       <div>
-        <TextField
-          {...register("obxSetId")}
-          label="Set ID"
-          fullWidth
-          error={!!errors.obxSetId}
-          helperText={errors.obxSetId?.message}
-        />
-      </div>
-      <div>
         <Autocomplete
           disablePortal
           options={valueTypeOptions}
-          onChange={(_, value) => setValue("valueType", value?.value || "")}
+          onChange={(_, value) => {
+            setValue("valueType", value?.value || "");
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
+              {...register("valueType")}
               label="Value Type"
               error={!!errors.valueType}
               helperText={errors.valueType?.message}
             />
           )}
-        />
-      </div>
-      <div>
-        <TextField
-          {...register("observationIdentifier")}
-          label="Observation Identifier"
-          fullWidth
-          error={!!errors.observationIdentifier}
-          helperText={errors.observationIdentifier?.message}
         />
       </div>
       <div>
@@ -242,30 +332,24 @@ const TestResultsForm = () => {
       </div>
       <div>
         <TextField
-          {...register("observationValue")}
+          {...register("observation")}
           label="Observation Value"
           fullWidth
-          error={!!errors.observationValue}
-          helperText={errors.observationValue?.message}
-        />
-      </div>
-      <div>
-        <TextField
-          {...register("units")}
-          label="Units"
-          fullWidth
-          error={!!errors.units}
-          helperText={errors.units?.message}
+          error={!!errors.observation}
+          helperText={errors.observation?.message}
         />
       </div>
       <div>
         <Autocomplete
           disablePortal
           options={resultStatusOptions}
-          onChange={(_, value) => setValue("resultStatus", value?.value || "")}
+          onChange={(_, value) => {
+            setValue("resultStatus", value?.value || "");
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
+              {...register("resultStatus")}
               label="Result Status"
               error={!!errors.resultStatus}
               helperText={errors.resultStatus?.message}
@@ -273,6 +357,9 @@ const TestResultsForm = () => {
           )}
         />
       </div>
+      {/* Hidden Fields */}
+      <input type="hidden" {...register("hl7MessageType")} />
+      <input type="hidden" {...register("patientID")} />
 
       {/* Submit Button */}
       <div className="flex items-center justify-center col-span-2">

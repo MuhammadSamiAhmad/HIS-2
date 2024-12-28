@@ -55,7 +55,10 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
 
     const selectedPatient = patients.find((p) => `${p.id}` === patientId);
     if (selectedPatient) {
-      setValue("patient", patientId);
+      setValue(
+        "patient",
+        patientId + selectedPatient.firstName + selectedPatient.lastName
+      );
       setValue("patientID", patientId);
       setValue("fName", selectedPatient.firstName);
       setValue("lName", selectedPatient.lastName);
@@ -151,6 +154,7 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
         <TextField
           {...register("dob")}
           label="Date of Birth"
+          type="date"
           fullWidth
           InputLabelProps={{ shrink: true }}
         />
@@ -175,22 +179,6 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
         <TextField
           {...register("phone")}
           label="Phone Number"
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-        />
-      </div>
-      <div>
-        <TextField
-          {...register("dob")}
-          label="Date of Birth"
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-        />
-      </div>
-      <div>
-        <TextField
-          {...register("gender")}
-          label="Gender"
           fullWidth
           InputLabelProps={{ shrink: true }}
         />

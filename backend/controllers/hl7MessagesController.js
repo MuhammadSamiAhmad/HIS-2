@@ -185,8 +185,9 @@ function createOruR01Message(data) {
   message.setField("OBR.2", data.orderID);
   message.setField("OBR.3", `L${data.fillerOrderID}`);
   message.setField("OBR.4", `${data.testCode}^${data.testName}`);
-  message.setField("OBR.5", data.dateTime);
-  message.setField("OBR.5", data.provider);
+  message.setField("OBR.5", data.requestedDateTime);
+  message.setField("OBR.5", data.specimenReceivedDateTime || "");
+  message.setField("OBR.5", data.orderingProvider);
 
   // OBX Segment
   message.addSegment("OBX");
