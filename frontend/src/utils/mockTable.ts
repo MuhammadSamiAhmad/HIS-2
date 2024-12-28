@@ -405,7 +405,6 @@ export const MOCK_TABLE_DATA = {
       gender: "Male",
       bloodGroup: "B+",
     },
-    // Add more doctor patients as needed
   ],
 
   // Admin Appointments
