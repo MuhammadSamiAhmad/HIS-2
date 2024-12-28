@@ -345,34 +345,15 @@ const deleteAppointment = async (req, res) => {
 
 const getAppointments = async (req, res) => {
   const patient = JSON.parse(req.query.patient);
+  console.log(patient);
   const { patientID } = patient;
   try {
-    const upcomingAppointments = await prisma.visit.findMany({
-      where: { status: "Scheduled", patientId: patientID },
+    const allAppointments = await prisma.visit.findMany({
+      where: {patientId: patientID },
       include: { sets: true },
     });
-    const cancelledAppointments = await prisma.visit.findMany({
-      where: { status: "Cancelled", patientId: patientID },
-      include: { Sets: true },
-    });
-    const completedAppointments = await prisma.visit.findMany({
-      where: { status: "Completed", patientId: patientID },
-      include: { Sets: true },
-    });
-    const scheduledAppointmentsDetails =
-    await getRequiredAppointmentsAttributes(upcomingAppointments);
-    const cancelledAppointmentsDetails =
-    await getRequiredAppointmentsAttributes(cancelledAppointments);
-    const completedAppointmentsDetails =
-    await getRequiredAppointmentsAttributes(completedAppointments);
-    const allAppointments = {
-      scheduledAppointmentsDetails,
-      cancelledAppointmentsDetails,
-      completedAppointmentsDetails,
-    };
-    // console.log(allAppointments)
-    // console.log(scheduledAppointmentsDetails)
-    res.json(allAppointments);
+    const appointments = await getRequiredAppointmentsAttributes(allAppointments);
+    res.json(appointments);
   } catch (error) {
     console.error("Error registering patient:", error);
     res
@@ -384,31 +365,51 @@ const getAppointments = async (req, res) => {
 };
 
 async function getRequiredAppointmentsAttributes(appointmentsList) {
-  const appointmentsDetails = [];
+  const upcomingAppointments = [];
+  const pastAppointments = [];
+  const currentDate = new Date();
   
   if (appointmentsList.length > 0) {
     for (const visit of appointmentsList) {
       const { id, date, time, sets: dentist, serviceName, invoice } = visit;
       const dentistName = `Dr. ${dentist.fName} ${dentist.lName}`;
+      const dentistImage = dentist.personalImageURL;
       const appointmentDate = date.toISOString().split("T")[0];
       const startTime = time.split("-")[0]; // Extract start time
       const appointmentTime = startTime.replace(/^0+/, ""); // Remove leading zeros
-      const appointmentDateTime = `${appointmentDate}, ${appointmentTime}`;
+      const dateTime = `${appointmentDate}, ${appointmentTime}`;
       const category = serviceName;
       const paymentStatus = invoice?.status || "Unpaid";
       
-      appointmentsDetails.push({
+      const appointmentDetails = {
         id,
         dentistName,
-        appointmentDateTime,
+        dentistImage,
         category,
+        dateTime,
         paymentStatus,
-      });
+      };
+
+      // Determine if the appointment is upcoming or past
+      if (
+        visit.status === "Scheduled" && 
+        date > currentDate
+      ) {
+        upcomingAppointments.push(appointmentDetails);
+      } else if (
+        visit.status === "Completed" || 
+        visit.status === "Cancelled"
+      ) {
+        pastAppointments.push(appointmentDetails);
+      }
     }
   }
-  
-  return appointmentsDetails;
-};
+
+  return {
+    upcoming: upcomingAppointments,
+    past: pastAppointments,
+  };
+    }
 
 const editAppointments = async (req, res) => {
   console.log(req.body);

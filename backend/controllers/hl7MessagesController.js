@@ -1,5 +1,20 @@
 const hl7 = require("hl7-standard");
+const axios = require("axios");
 
+
+const sendHL7Message = async (endpoint, message, messageType) => {
+  try {
+    const response = await axios.post(`http://localhost:3001/${endpoint}`, {
+      hl7Message: message,
+    });
+    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
+  } catch (error) {
+    console.error(
+      `❌ [${messageType}] Failed to send message to /${endpoint}:`,
+      error.message
+    );
+  }
+};
 // Utility to format timestamps for HL7 messages
 function formatHL7Timestamp(date = new Date()) {
   const pad = (num) => num.toString().padStart(2, "0");
@@ -9,55 +24,51 @@ function formatHL7Timestamp(date = new Date()) {
 }
 
 // ADT^A04 Message
-function createAdtA04Message(data) {
-  const message = new hl7.Message();
+const createAdtA04Message = async (req, res) =>{
+  const {data} = req.body
   const timestamp = formatHL7Timestamp();
 
-  // MSH Segment
-  message.addSegment("MSH");
-  message.setField("MSH.1", "|");
-  message.setField("MSH.2", "^~\\&");
-  message.setField("MSH.3", data.sendingFacility); //SanOris
-  message.setField("MSH.4", data.sendingFacilityApplication); //Dental Clinic
-  message.setField("MSH.5", data.receivingFacility); //Lab or whatever App Name
-  message.setField("MSH.6", data.receivingFacilityApplication); //lab
-  message.setField("MSH.7", timestamp); // date auto-generated at once
-  message.setField("MSH.9", data.hl7MessageType); //ADT
-  message.setField("MSH.10", data.patientID.toString().reverse());
-  message.setField("MSH.11", "P"); //HL7 version
-  message.setField("MSH.12", "2.5"); //HL7 Version
+  const message = [
+    ["MSH", "|", "^~\\&", data.sendingFacility, data.sendingFacilityApplication, data.receivingFacility, data.receivingFacilityApplication, timestamp, "", data.hl7MessageType, data.patientID.toString().split("").reverse().join(""), "P", "2.5"],
+    ["PID", "1", `${data.patientID}^^^${data.sendingFacility}`, "", "", `${data.lName}^${data.fName}^${data.mName || ""}`, "", data.dob, data.gender, "", "", data.address, "", data.phone],
+    ["PV1", "1", data.patientClass || "O", "", "", "", data.attendingPhysician || ""],
+  ];
 
-  // PID Segment
-  message.addSegment("PID");
-  message.setField("PID.1", "1");
-  message.setField("PID.2", `${data.patientID}^^^${data.sendingFacility}`);
-  message.setField("PID.5", `${data.lName}^${data.fName}^${data.mName || ""}`);
-  message.setField("PID.7", data.dob);
-  message.setField("PID.8", data.gender);
-  message.setField("PID.11", data.address);
-  message.setField("PID.13", data.phone);
-
-  // PV1 Segment
-  message.addSegment("PV1");
-  message.setField("PV1.1", "1");
-  message.setField("PV1.2", data.patientClass || "O"); // Default to outpatient
-  message.setField("PV1.7", data.attendingPhysician || "");
-
-  // AL1 Segment (if allergy data exists)
   if (data.allergy) {
-    message.addSegment("AL1");
-    message.setField("AL1.1", "1");
-    message.setField("AL1.2", data.allergy.type || "");
-    message.setField("AL1.3", data.allergy.severity || "");
-    message.setField("AL1.4", data.allergy.reaction || "");
+    message.push([
+      "AL1",
+      "1",
+      data.allergy.type || "",
+      data.allergy.severity || "",
+      data.allergy.reaction || ""
+    ]);
   }
+  const adtMessage = message.toString();
 
-  return message.toString();
+  try {
+    // Assuming sendHL7Message is an async function that sends the HL7 message
+    await sendHL7Message("adt", adtMessage, "ADT^A04");
+
+    // Send success response
+    return res.status(200).json({
+      success: true,
+      message: "HL7 ADT^A04 message sent successfully",
+      data: adtMessage,
+    });
+  } catch (error) {
+    // Send failure response if something goes wrong
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send HL7 ADT^A04 message",
+      error: error.message,
+    });
+  }
 }
 
 // SCH^S12 Message
-function createSchS12Message(data) {
-  const message = new hl7.Message();
+const createSchS12Message = async (req, res) =>{
+
+  const {data} = req.body
 
   // MSH Segment
   message.addSegment("MSH");
@@ -204,7 +215,7 @@ function createOruR01Message(data) {
 
 module.exports = {
   createAdtA04Message,
-  createSchS12Message,
-  createOrmO01Message,
-  createOruR01Message,
+  // createSchS12Message,
+  // createOrmO01Message,
+  // createOruR01Message,
 };
