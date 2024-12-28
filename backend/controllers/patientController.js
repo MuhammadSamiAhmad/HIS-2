@@ -1,8 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
-const PDFDocument = require("pdfkit");
-const fs = require("fs");
-const { connect } = require("http2");
+// const PDFDocument = require("pdfkit");
+// const fs = require("fs");
+// const { connect } = require("http2");
 
 const prisma = new PrismaClient();
 

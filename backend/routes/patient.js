@@ -1,5 +1,5 @@
 const express = require("express");
-const patientsController = require("../controllers/patientsController");
+const patientsController = require("../controllers/patientController");
 const router = express.Router();
 
 router
@@ -24,7 +24,7 @@ router.delete(
 );
 
 router.get("/records", patientsController.getMedicalRecords);
-router.get("/prescriptions", patientsController.getPrescriptions);
+// router.get("/prescriptions", patientsController.getPrescriptions);
 router.get("/invoices", patientsController.getInvoices);
 
 router.patch("/patientSettings/:patientId", patientsController.updatePatient);
