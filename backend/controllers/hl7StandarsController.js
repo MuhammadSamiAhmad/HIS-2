@@ -32,10 +32,10 @@ function formatHL7Timestamp(date = new Date()) {
 
 //ADT^A04 Message
 const createAdtA04Message = async (req, res) =>{
-  const {data} = req.body
+  const data = req.body
+  console.log(data)
   let message = new hl7();
   const timestamp = formatHL7Timestamp();
-
   // MSH Segment
   message.createSegment("MSH");
   message.set("MSH", {
@@ -89,7 +89,7 @@ const createAdtA04Message = async (req, res) =>{
       "AL1.4": data.allergy.reaction || "",
     });
   }
-
+  message = message.transform();
   message = message.build();
   console.log(message)
   const encryptedMessage = encryptMessage(message);
@@ -118,11 +118,11 @@ const createAdtA04Message = async (req, res) =>{
 // SCH^S12 Message
 const createSchS12Message = async (req, res) =>{
   const {data} = req.body
-  let hl7 = new hl7();
+  let message = new hl7();
   const [messageCode, triggerEvent] = data.hl7MessageType
   // MSH Segment
-  hl7.createSegment("MSH");
-  hl7.set("MSH",{
+  message.createSegment("MSH");
+  message.set("MSH",{
   "MSH.1": "|",
   "MSH.2": "^~\\&",
   "MSH.3": data.sendingFacility, //SanOris
@@ -137,31 +137,31 @@ const createSchS12Message = async (req, res) =>{
   })
 
   // SCH Segment
-  hl7.createSegment("SCH");
-  hl7.set('SCH',{
+  message.createSegment("SCH");
+  message.set('SCH',{
   "SCH.1": data.appointmentID,
   "SCH.2": data.startTime,
   "SCH.3": data.endTime,
   "SCH.4": data.duration,
-  "SCH.5": data.practitionerFName,
+  "SCH.5": data.practitionerName,
   "SCH.6": data.appointmentType,
   "SCH.7": data.status,
 })
 
   // PID Segment
-  hl7.createSegment("PID",{
+  message.createSegment("PID",{
   "PID.1": `${data.patientID}^^^${data.sendingFacility}`,
   "PID.2": `${data.lName}^${data.fName}`,
   "PID.3": data.dob,
   "PID.4": data.gender,})
 
   // AIG Segment
-  hl7.createSegment("AIG",{
+  message.createSegment("AIG",{
     "AIG.1": `${data.practitionerFName}^${data.practitionerLName}`,
     "AIG.2": data.practitionerId,
     "AIG.3": data.appointmentType,})
 
-  hl7 = hl7.build();
+  message = message.build();
   console.log(message);
   const encryptedMessage = encryptMessage(message);
   console.log(encryptedMessage);

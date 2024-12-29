@@ -6,6 +6,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
+import { useEffect } from "react";
 
 const schema = z.object({
   patient: z.string().nonempty("Please select a patient"),
@@ -42,7 +43,7 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
   const {
     register,
     handleSubmit,
-    setValue,
+    setValue,watch,
     formState: { errors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
@@ -51,7 +52,18 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
       sendingFacilityApplication: "Dental Clinic",
       hl7MessageType: messageType,
     },
+    mode: "all", // Track validation in real-time
+    criteriaMode: "all", // Provide detailed error messages
   });
+
+//Form Debugging
+const formValues = watch();
+//Form Debugging
+// Log errors and form values
+useEffect(() => {
+console.log("Form Errors:", errors);
+console.log("Form Values:", formValues);
+}, [errors, formValues]); // Re-run logs on errors or values change
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     console.log("Submitted data:", data);

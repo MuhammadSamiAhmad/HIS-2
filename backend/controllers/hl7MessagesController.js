@@ -166,3 +166,5 @@ module.exports = {
   createOrmO01Message,
   createOruR01Message,
 };
+// At the bottom of your hl7MessagesController.js file
+console.log("HL7 Controller is running...");
