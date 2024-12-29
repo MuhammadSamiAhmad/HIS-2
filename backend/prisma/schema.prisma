@@ -182,6 +182,7 @@ model Item {
   description          String
   manufacturer         String
   supplier             String
+  equipmentImage       String                @default("inventoryDefaultImage.jpg")
   currentTotalQuantity Int                   @default(0)
   purchaseDetails      ItemPurchaseDetails[]
 }

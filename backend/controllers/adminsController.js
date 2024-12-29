@@ -60,35 +60,52 @@ const getAllPatientsForHL7 = async (req, res) => {
 
 // Patients
 const getAllPatients = async (req, res) => {
-    const patients = await prisma.patient.findMany();
+    let patients = await prisma.patient.findMany({select:{
+        patientID: true,
+        fName: true,
+        lName: true,
+        age: true,
+        gender: true,
+        bloodGroup: true,
+        personalImageURL: true,
+    }});
 
-    if (patients.length === 0) {
-        return res.status(400).json({ 'message': 'No patients found' });
-    }
+    patients = patients.map(patient => ({
+        id: patient.patientID,
+        patientName: `${patient.fName} ${patient.lName}`,
+        patientImage: patient.personalImageURL,
+        age: patient.age,
+        gender: patient.gender,
+        bloodGroup: patient.bloodGroup,
+    }));
 
-    // Fetch the last completed appointment for each patient
-    for (let patient of patients) {
-        const lastCompletedAppointment = await prisma.visit.findFirst({
-            where: { 
-                patientId: patient.patientID,
-                status: 'Completed'
-            },
-            orderBy: [
-                { date: 'desc' },
-                { time: 'desc' }
-            ],
-            include: {
-                Service: true
-            }
-        });
+    // if (patients.length === 0) {
+    //     return res.status(400).json({ 'message': 'No patients found' });
+    // }
 
-        // Add the service of the last completed appointment to the patient object
-        patient.lastVisitServiceDone = lastCompletedAppointment ? lastCompletedAppointment.Service.ServiceName : null;
+    // // Fetch the last completed appointment for each patient
+    // for (let patient of patients) {
+    //     // const lastCompletedAppointment = await prisma.visit.findFirst({
+    //     //     where: { 
+    //     //         patientId: patient.patientID,
+    //     //         status: 'Completed'
+    //     //     },
+    //     //     orderBy: [
+    //     //         { date: 'desc' },
+    //     //         { time: 'desc' }
+    //     //     ],
+    //     //     include: {
+    //     //         Service: true
+    //     //     }
+    //     // });
 
-        // Format birthDate
-        const birthDate = new Date(patient.birthDate);
-        patient.birthDate = birthDate.toISOString().split('T')[0];
-    }
+    //     // Add the service of the last completed appointment to the patient object
+    //     // patient.lastVisitServiceDone = lastCompletedAppointment ? lastCompletedAppointment.Service.ServiceName : null;
+
+    //     // Format birthDate
+    //     const birthDate = new Date(patient.birthDate);
+    //     patient.birthDate = birthDate.toISOString().split('T')[0];
+    // }
 
     res.json(patients);
 };
@@ -264,9 +281,9 @@ const getAllDoctors = async (req, res) => {
         },
       });
 
-    if (doctors.length === 0) {
-        return res.status(400).json({ 'message': 'No doctors found' });
-    }
+    if (doctors.length > 0) {
+        // return res.status(400).json({ 'message': 'No doctors found' });
+    
 
     // // Add degreeOfSpecialization field and format birthDate for each doctor
     // doctors = doctors.map(doctor => ({
@@ -283,7 +300,7 @@ const getAllDoctors = async (req, res) => {
         gender: doctor.gender,
         email:doctor.email,
         status: "Available",
-    }));
+    }));}
 
     res.json(doctors);
 };
@@ -515,7 +532,7 @@ const deleteDoctor = async (req, res) => {
 const getAllAppointments = async (req, res) => {
     const appointments = await prisma.visit.findMany({
         include: {
-            Reserve: {
+            reserve: {
                 select: {
                     fName: true,
                     lName: true,
@@ -524,38 +541,46 @@ const getAllAppointments = async (req, res) => {
                     phone: true,
                 },
             },
-            Sets: {
+            sets: {
                 select: {
                     fName: true,
                     lName: true,
                 },
             },
-            Service: {
-                select: {
-                    ServiceName: true,
-                },
-            },
         },
     });
 
-    if (appointments.length === 0) {
-        return res.status(400).json({ 'message': 'No appointments found' });
-    }
-
+    const upcomingAppointments = [];
+    const pastAppointments = [];
+    const currentDate = new Date();
+    if (appointments.length > 0) {
+        // return res.status(400).json({ 'message': 'No appointments found' });
+    
     // Format the appointments data
     const formattedAppointments = appointments.map(appointment => ({
-        ID: appointment.id,
-        'Patient Name': `${appointment.Reserve.fName} ${appointment.Reserve.lName}`,
-        Email: appointment.Reserve.email,
-        Gender: appointment.Reserve.gender,
-        Date: new Date(appointment.date).toISOString().split('T')[0],
-        Time: appointment.time,
-        'Mobile Number': appointment.Reserve.phone,
-        'Doctor Name': `${appointment.Sets.fName} ${appointment.Sets.lName}`,
-        'Service Name': appointment.Service.ServiceName,
+        id: appointment.id,
+        patientName: `${appointment.reserve.fName} ${appointment.reserve.lName}`,
+        dentistName: `${appointment.sets.fName} ${appointment.sets.lName}`,
+        dateTime: `${new Date(appointment.date).toISOString().split('T')[0]}, ${appointment.time}`,
+        status: appointment.status,
+        category: appointment.serviceName,
     }));
+    for (const appointment of formattedAppointments){
+        if (
+            appointment.status === "Scheduled" && 
+            date > currentDate
+          ) {
+            upcomingAppointments.push(appointment);
+          } else if (
+            appointment.status === "Completed" || 
+            appointment.status === "Cancelled"
+          ) {
+            pastAppointments.push(appointment);
+          }
+    }
+}
 
-    res.json(formattedAppointments);
+    res.json({ upcoming: upcomingAppointments, past: pastAppointments,});
 };
 
 const createNewAppointmentAndInvoice = async (req, res) => {
@@ -746,35 +771,36 @@ try {
 const getAllItems = async (req, res) => {
     const items = await prisma.item.findMany({
         include: {
-            PurchaseDetails: true,
+            purchaseDetails: true,
         },
     });
-
-    if (items.length === 0) {
-        return res.status(400).json({ 'message': 'No items found' });
-    }
+    const formattedItems= [];
+    if (items.length > 0) {
+        // return res.status(400).json({ 'message': 'No items found' });
+    
 
     // Format the items data
-    const formattedItems = items.map(item => {
+    formattedItems = items.map(item => {
         // Get the supplier for the item
-        const supplier = item.Supplier;
+        // const supplier = item.supplier;
 
         // Get the most recent cost for the item
-        const mostRecentCost = item.PurchaseDetails.sort((a, b) => b.PurchaseDate - a.PurchaseDate)[0]?.Cost;
+        // const mostRecentCost = item.purchaseDetails.sort((a, b) => b.purchaseDate - a.purchaseDate)[0]?.cost;
 
         // Get the total quantity for the item from the currentTotalQuantity field
         const totalQuantity = item.currentTotalQuantity;
 
         return {
-            'Item ID': item.ItemID,
-            'Item Name': item.Name,
-            'Description': item.Description,
-            'Manufacturer': item.Manufacturer,
-            'Quantity': totalQuantity,
-            'Cost': mostRecentCost,
-            'Supplier': supplier,
+            id: item.itemID,
+            equipmentName: item.name,
+            // 'Description': item.Description,
+            equipmentBrand: item.manufacturer,
+            equipmentQuantity: totalQuantity,
+            equipmentImage: item.equipmentImage,
+            // 'Cost': mostRecentCost,
+            // 'Supplier': supplier,
         };
-    });
+    });}
 
     res.json(formattedItems);
 };
