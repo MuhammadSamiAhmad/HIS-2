@@ -3,7 +3,11 @@ import DropdownArrow from "../../assets/images/DropdownArrow.svg";
 import AccountIcon from "../../assets/images/user-circle-single--circle-geometric-human-person-single-user.svg";
 import Logout from "../../assets/images/logout.svg";
 import { Link, useNavigate } from "react-router-dom";
+import { useSidebarStore } from "../../store/sidebarStore";
+
 export const ProfileDropdown: React.FC = () => {
+  const { setActiveSection } = useSidebarStore(); // Import the setActiveSection action
+
   const navigate = useNavigate();
   return (
     <div>
@@ -22,7 +26,10 @@ export const ProfileDropdown: React.FC = () => {
             sideOffset={5}
           >
             <DropdownMenu.Item
-              onClick={() => navigate("/account")}
+              onClick={() => {
+                navigate("/account");
+                setActiveSection("Account Settings");
+              }}
               className="flex flex-row items-center justify-start gap-5 outline-none hover:cursor-pointer"
             >
               <img src={AccountIcon} />

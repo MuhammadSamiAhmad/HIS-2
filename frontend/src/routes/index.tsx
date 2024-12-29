@@ -18,6 +18,7 @@ import DoctorPatients from "../pages/doctor/DoctorPatients";
 import DoctorReservations from "../pages/doctor/DoctorReservations";
 import Account from "../pages/Account";
 import HL7 from "../pages/HL7";
+import HL7Display from "../pages/HL7Display";
 
 // Creating the router using `createBrowserRouter`
 // This defines the routes and structure of the application
@@ -101,6 +102,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["admin"]}>
             <HL7 />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/hl7-display",
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <HL7Display />
           </ProtectedRoute>
         ),
       },
