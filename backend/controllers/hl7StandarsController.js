@@ -1,6 +1,8 @@
 const hl7 = require("hl7-standard");
 const axios = require("axios");
 const CryptoJS = require("crypto-js");
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 
 const ENCRYPTION_KEY = "SecureKey123!@#";
@@ -13,7 +15,8 @@ function encryptMessage(message) {
 const sendHL7Message = async (endpoint, message, messageType) => {
   try {
     const response = await axios.post(`http://localhost:3001/${endpoint}`, {encryptedMessage: message, messageType:messageType});
-    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
+    console.log(`✅ [${messageType}] Message sent to /${endpoint}:`);
+    // console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
   } catch (error) {
     console.error(
       `❌ [${messageType}] Failed to send message to /${endpoint}:`,
@@ -29,6 +32,7 @@ function formatHL7Timestamp(date = new Date()) {
     date.getDate()
   )}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
+
 
 //ADT^A04 Message
 const createAdtA04Message = async (req, res) =>{
@@ -92,9 +96,9 @@ const createAdtA04Message = async (req, res) =>{
   }
 
   message = message.build();
-  console.log(message)
+  console.log(`✅  Message sent before encryption : ${message}`);
   const encryptedMessage = encryptMessage(message);
-  console.log(encryptedMessage)
+  console.log(`✅  Message sent after encryption : ${encryptedMessage}`);
 
   try {
     // Assuming sendHL7Message is an async function that sends the HL7 message
@@ -119,6 +123,24 @@ const createAdtA04Message = async (req, res) =>{
 // SCH^S12 Message
 const createSchS12Message = async (req, res) =>{
   const {data} = req.body
+
+  console.log(`pID : ${data.patientID}`)
+  //  const diagnosis = await prisma.diagnosis.findUnique({
+  //   where: {
+  //     patientId: data.patientID, 
+  //   },
+  //   select: {
+  //     visitId: true, 
+  //   },
+  // });
+  // if (!diagnosis) {
+  //   return res.status(404).json({
+  //     success: false,
+  //     message: "Diagnosis not found for the given patient.",
+  //   });
+  // }
+  // const appointmentID = diagnosis.visitId;
+
   let message = new hl7();
   const [messageCode, triggerEvent] = data.hl7MessageType
   // MSH Segment
@@ -140,6 +162,7 @@ const createSchS12Message = async (req, res) =>{
   // SCH Segment
   message.createSegment("SCH");
   message.set('SCH',{
+  // "SCH.1": appointmentID,
   "SCH.1": data.appointmentID,
   "SCH.2": data.startTime,
   "SCH.3": data.endTime,
@@ -163,9 +186,9 @@ const createSchS12Message = async (req, res) =>{
     "AIG.3": data.appointmentType,})
 
   message = message.build();
-  console.log(message);
+  console.log(`✅  Message sent before encryption : ${message}`);
   const encryptedMessage = encryptMessage(message);
-  console.log(encryptedMessage);
+  console.log(`✅  Message sent after encryption : ${encryptedMessage}`);
 
   try {
     await sendHL7Message("sch", encryptedMessage, "SCH^S12");
@@ -182,6 +205,8 @@ const createSchS12Message = async (req, res) =>{
     });
   }
 }
+
+
 
 //ORM^O01 Message
 const createOrmO01Message = async (req, res) =>{
@@ -201,8 +226,8 @@ const createOrmO01Message = async (req, res) =>{
     "MSH.7": timestamp, // date auto-generated at once
     "MSH.9": data.hl7MessageType, // ORM
     "MSH.10": data.patientID.toString().split("").reverse().join(""), // Reversed Patient ID
-    "MSH.11": "P", // Processing ID
-    "MSH.12": "2.5", // HL7 Version
+    "MSH.11": "P"   ,  // Processing ID
+    "MSH.12": "2.5" ,  // HL7 Version
   });
 
   // PID Segment
@@ -243,9 +268,9 @@ const createOrmO01Message = async (req, res) =>{
   });
 
   message = message.build();
-  console.log(message);
+  console.log(`✅  Message sent before encryption : ${message}`);
   const encryptedMessage = encryptMessage(message);
-  console.log(encryptedMessage);
+  console.log(`✅  Message sent after encryption : ${encryptedMessage}`);
 
   try {
     await sendHL7Message("orm", encryptedMessage, "ORM^O01");
@@ -262,6 +287,8 @@ const createOrmO01Message = async (req, res) =>{
     });
   }
 }
+
+
 
 //ORU^R01 Message
 const createOruR01Message = async (req, res) =>{
@@ -281,7 +308,7 @@ const createOruR01Message = async (req, res) =>{
     "MSH.7": timestamp, // Date auto-generated at once
     "MSH.9": data.hl7MessageType, // ORU
     "MSH.10": data.patientID.toString().split("").reverse().join(""), // Reversed Patient ID
-    "MSH.11": "P", // Processing ID
+    "MSH.11": "P",   // Processing ID
     "MSH.12": "2.5", // HL7 Version
   });
 
@@ -324,9 +351,9 @@ const createOruR01Message = async (req, res) =>{
   message = message.build();
   // message = message.toString();
 
-  console.log(message);
+  console.log(`✅  Message sent before encryption : ${message}`);
   const encryptedMessage = encryptMessage(message);
-  console.log(encryptedMessage);
+  console.log(`✅  Message sent after encryption : ${encryptedMessage}`);
 
   try {
     await sendHL7Message("oru", encryptedMessage, "ORU^R01");

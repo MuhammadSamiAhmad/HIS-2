@@ -20,9 +20,10 @@ const hl7Handler = async (req, res) => {
       return res.status(400).send("❌ No HL7 message received");  // Send a response and return to stop further execution
   }
 
+  console.log(`📥 [${messageType}] Message received before decryption:\n${encryptedMessage}`);
   // Decrypt message
   const decryptedMessage = decryptMessage(encryptedMessage);
-  console.log(`📥 [${messageType}] Message received:\n${decryptedMessage}`);
+  console.log(`📥 [${messageType}] Message received after decryption:\n${decryptedMessage}`);
   
   // Process the decrypted message based on message type
   let extractedData = {};
@@ -41,7 +42,6 @@ const hl7Handler = async (req, res) => {
       extractedData: extractedData,
   });
 };
-
 
 
 // process HL7 message based on type
