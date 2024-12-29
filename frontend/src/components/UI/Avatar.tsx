@@ -1,19 +1,31 @@
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
-export const Avatar: React.FC = () => {
+interface AvatarProps {
+  profileImage: string; // URL of the profile image
+  username: string; // Full name of the user
+}
+
+export const Avatar = ({ profileImage, username }: AvatarProps) => {
+  const getInitials = (name: string): string => {
+    return name
+      .split(" ") // Split name into words
+      .map((word) => word.charAt(0).toUpperCase()) // Take the first letter of each word and capitalize
+      .join(""); // Join the initials into a single string
+  };
+
   return (
     <div>
       <AvatarPrimitive.Root className="inline-flex size-[45px] select-none items-center justify-center overflow-hidden rounded-full bg-blackA1 align-middle">
         <AvatarPrimitive.Image
           className="size-full rounded-[inherit] object-cover"
-          src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-          alt="Colm Tuite"
+          src={profileImage}
+          alt={username}
         />
         <AvatarPrimitive.Fallback
           className="leading-1 flex size-full items-center justify-center bg-white text-[15px] font-medium text-violet11"
           delayMs={600}
         >
-          CT
+          {getInitials(username)}
         </AvatarPrimitive.Fallback>
       </AvatarPrimitive.Root>
     </div>

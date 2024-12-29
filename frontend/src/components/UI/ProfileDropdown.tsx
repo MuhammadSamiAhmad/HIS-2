@@ -2,7 +2,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import DropdownArrow from "../../assets/images/DropdownArrow.svg";
 import AccountIcon from "../../assets/images/user-circle-single--circle-geometric-human-person-single-user.svg";
 import Logout from "../../assets/images/logout.svg";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 export const ProfileDropdown: React.FC = () => {
   const navigate = useNavigate();
   return (
@@ -29,10 +29,12 @@ export const ProfileDropdown: React.FC = () => {
               Account
             </DropdownMenu.Item>
             <DropdownMenu.Separator className="m-[5px] h-px bg-Silver-2" />
-            <DropdownMenu.Item className="flex flex-row items-center justify-start gap-5 outline-none hover:cursor-pointer">
-              <img src={Logout} />
-              Logout
-            </DropdownMenu.Item>
+            <Link to={"/account"}>
+              <DropdownMenu.Item className="flex flex-row items-center justify-start gap-5 outline-none hover:cursor-pointer">
+                <img src={Logout} />
+                Logout
+              </DropdownMenu.Item>
+            </Link>
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
