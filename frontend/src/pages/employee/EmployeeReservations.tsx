@@ -3,6 +3,12 @@ import Tabs from "../../components/UI/Tabs";
 import { MOCK_TABLE_DATA } from "../../utils/mockTable";
 import { GridColDef } from "@mui/x-data-grid";
 import { AdminAppointmentRow } from "../../types/dataGridTypes";
+// import axios from "axios";
+
+
+// const res = await axios.get("http://localhost:3307/admin/appointments");
+// const {upcoming, past} = res.data;
+// console.log(res.data);
 
 export default function EmployeeReservations() {
   const columns: GridColDef<AdminAppointmentRow>[] = [
@@ -108,6 +114,7 @@ export default function EmployeeReservations() {
       value: "upcoming",
       content: (
         <Table<AdminAppointmentRow>
+          // rows={upcoming}
           rows={MOCK_TABLE_DATA.adminAppointments}
           columns={columns}
         />
@@ -118,6 +125,7 @@ export default function EmployeeReservations() {
       value: "past",
       content: (
         <Table<AdminAppointmentRow>
+          // rows={past}
           rows={MOCK_TABLE_DATA.adminAppointments}
           columns={columns}
         />

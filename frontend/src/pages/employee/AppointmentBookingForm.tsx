@@ -3,7 +3,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { patients } from "../../utils/mockHL7Data";
 import { Autocomplete, TextField } from "@mui/material";
-// import axios from "axios";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import axios from "axios";
 // import { useEffect } from "react";
 
 const schema = z.object({
@@ -64,9 +66,17 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
   //Form Debugging
   // const formValues = watch();
 
-  const onSubmit: SubmitHandler<FormFields> = (data) => {
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
     // Log errors and form values
     console.log("Submitted data:", data);
+    try {
+      const response = await axios.post("http://localhost:3307/HL7Messages/sch", { data });
+      // Handle success if needed
+      toast.success("Message sent successfully!");
+    } catch (error) {
+      // Show error message in the toast notification
+      toast.error("Failed to send the message: ");
+    }
   };
   const handlePatientSelect = (patientId: string | undefined) => {
     if (!patientId) return;
@@ -306,6 +316,7 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
         >
           Submit
         </button>
+        <ToastContainer />
       </div>
     </form>
   );
