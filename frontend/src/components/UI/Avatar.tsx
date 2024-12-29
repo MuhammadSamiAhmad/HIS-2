@@ -22,7 +22,7 @@ export const Avatar = ({ profileImage, username }: AvatarProps) => {
           alt={username}
         />
         <AvatarPrimitive.Fallback
-          className="leading-1 flex size-full items-center justify-center bg-white text-[15px] font-medium text-violet11"
+          className="leading-1 flex size-full items-center justify-center bg-Silver-2 text-[15px] font-medium text-violet11"
           delayMs={600}
         >
           {getInitials(username)}

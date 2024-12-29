@@ -13,6 +13,7 @@ import {
   FaMapMarkerAlt,
   FaBriefcase,
 } from "react-icons/fa";
+// import { useEffect } from "react";
 
 // Define the schema for validation
 const schema = z
@@ -34,7 +35,6 @@ const schema = z
     reenterPassword: z
       .string()
       .min(8, "Re-enter Password must be at least 8 characters"),
-    workingHours: z.string().nonempty("Working hours are required"),
     gender: z.enum(["male", "female"], {
       errorMap: () => ({ message: "Gender is required" }),
     }),
@@ -46,9 +46,14 @@ const schema = z
       })
       .transform((date) => new Date(date)),
   })
-  .refine((data) => data.password === data.reenterPassword, {
-    message: "Passwords must match",
-    path: ["reenterPassword"],
+  .superRefine((data, ctx) => {
+    if (data.password !== data.reenterPassword) {
+      ctx.addIssue({
+        code: "custom", // Specify the issue type
+        path: ["reenterPassword"], // Path to indicate the field with the error
+        message: "Passwords must match",
+      });
+    }
   });
 
 type FormFields = z.infer<typeof schema>;
@@ -58,10 +63,22 @@ export default function AddDoctorForm() {
   const {
     register,
     handleSubmit,
+    // watch,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
+    // mode: "all",
+    // criteriaMode: "all",
   });
+
+  // const formValues = watch();
+
+  //Form Debugging
+  // // Log errors and form values
+  // useEffect(() => {
+  //   console.log("Form Errors:", errors);
+  //   console.log("Form Values:", formValues);
+  // }, [errors, formValues]); // Re-run logs on errors or values change
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
