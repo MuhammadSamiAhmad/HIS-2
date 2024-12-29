@@ -37,36 +37,34 @@ function decryptMessage(encryptedMessage) {
 }
 
 const hl7Handler = async (req, res) => {
-    const { encryptedMessage , messageType } = req.body;
-    
-    if (!encryptedMessage) {
-        console.warn(`❌ [${messageType}] No HL7 message received.`);
-        return res.status(400).send("❌ No HL7 message received");
-    }
+  const { encryptedMessage, messageType } = req.body;
+  
+  if (!encryptedMessage) {
+      console.warn(`❌ [${messageType}] No HL7 message received.`);
+      return res.status(400).send("❌ No HL7 message received");  // Send a response and return to stop further execution
+  }
 
-    const decryptedMessage = decryptMessage(encryptedMessage);
-    console.log(decryptedMessage);
-        // console.log(hl7Message);
-    // const originalMessage = bytes.toString(CryptoJS.enc.Utf8);
-    console.log(`📥 [${messageType}] Message received:\n${decryptedMessage}`);
-    res.send(`✅ [${messageType}] Message received successfully`);
-    
-    // Process the decrypted message based on message type
- let extractedData = {};
- try {
-     extractedData = processHL7Message(decryptedMessage, messageType);
- } catch (error) {
-     console.error(`❌ Error processing message: ${error.message}`);
-     return res.status(500).send("❌ Error processing message");
- }
-console.log(`📤 [${messageType}] Extracted data:`, extractedData);
-res.json({
-     message: `✅ [${messageType}] Message processed successfully`,
-     extractedData: extractedData,
- });
-    
+  // Decrypt message
+  const decryptedMessage = decryptMessage(encryptedMessage);
+  console.log(`📥 [${messageType}] Message received:\n${decryptedMessage}`);
+  
+  // Process the decrypted message based on message type
+  let extractedData = {};
+  try {
+      extractedData = processHL7Message(decryptedMessage, messageType);
+  } catch (error) {
+      console.error(`❌ Error processing message: ${error.message}`);
+      return res.status(500).send("❌ Error processing message");  // Send response and return
+  }
+
+  console.log(`📤 [${messageType}] Extracted data:`, extractedData);
+
+  // Ensure you send only one response, use return to prevent further execution
+  return res.json({
+      message: `✅ [${messageType}] Message processed successfully`,
+      extractedData: extractedData,
+  });
 };
-
 
 // process HL7 message based on type
 const processHL7Message = (message, messageType) => {
