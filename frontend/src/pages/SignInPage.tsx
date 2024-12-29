@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FaUserAlt, FaLock } from "react-icons/fa";
 import { useAuthStore } from "../store/authStore";
 import { signInUser, MOCK_USERS } from "../utils/mockAuth";
-import axios from "axios";
+// import axios from "axios";
 
 const schema = z.object({
   email: z.string().email("Invalid email"),

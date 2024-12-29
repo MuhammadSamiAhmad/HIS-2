@@ -3,7 +3,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { patients } from "../../utils/mockHL7Data";
 import { Autocomplete, TextField } from "@mui/material";
-import axios from "axios";
+// import axios from "axios";
+// import { useEffect } from "react";
 
 const schema = z.object({
   patient: z.string().nonempty("Please select a patient"),
@@ -24,7 +25,6 @@ const schema = z.object({
   address: z.string().nonempty("Address is required"),
   phone: z.string().nonempty("Phone number is required"),
 
-  appointmentID: z.string().nonempty("Patient ID is required"),
   startTime: z.string().nonempty("Start date/time is required"),
   endTime: z.string().nonempty("End date/time is required"),
   duration: z.number().positive("Duration must be positive"),
@@ -49,6 +49,7 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
     handleSubmit,
     setValue,
     formState: { errors },
+    // watch,
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -56,9 +57,15 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
       sendingFacilityApplication: "Dental Clinic",
       hl7MessageType: messageType,
     },
+    // mode: "all", // Track validation in real-time
+    // criteriaMode: "all", // Provide detailed error messages
   });
 
+  //Form Debugging
+  // const formValues = watch();
+
   const onSubmit: SubmitHandler<FormFields> = (data) => {
+    // Log errors and form values
     console.log("Submitted data:", data);
   };
   const handlePatientSelect = (patientId: string | undefined) => {
@@ -79,6 +86,12 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
       setValue("gender", selectedPatient.gender);
     }
   };
+  //Form Debugging
+  // // Log errors and form values
+  // useEffect(() => {
+  //   console.log("Form Errors:", errors);
+  //   console.log("Form Values:", formValues);
+  // }, [errors, formValues]); // Re-run logs on errors or values change
 
   const appointmentTypeOptions = [
     { label: "Consultation", value: "CONSULT" },
