@@ -181,7 +181,7 @@ const createSchS12Message = async (req, res) =>{
 
   // AIG Segment
   message.createSegment("AIG",{
-    "AIG.1": `${data.practitionerFName}^${data.practitionerLName}`,
+    "AIG.1": `${data.practitionerName}^${data.practitionerLName}`,
     "AIG.2": data.practitionerId,
     "AIG.3": data.appointmentType,})
 
