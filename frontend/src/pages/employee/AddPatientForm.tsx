@@ -16,6 +16,9 @@ import {
 } from "react-icons/fa";
 import { Droplet } from "lucide-react";
 import ScrollArea from "../../components/UI/ScrollArea";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 // Define the schema for validation
 const schema = z
@@ -86,7 +89,17 @@ export default function AddPatientForm() {
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log(data);
-    navigate("/success");
+    // try {
+    //   const response = await axios.post("http://localhost:3307/admin/patients", { data });
+    //   console.log(response);
+    //   // Handle success if needed
+    //   toast.success("Patient added successfully!");
+    // } catch (error) {
+    //   // Show error message in the toast notification
+    //   toast.error(`Failed to add the patient: ${error}`);
+    //   console.log(error);
+    // }
+    // navigate("/success");
   };
 
   return (
@@ -299,6 +312,7 @@ export default function AddPatientForm() {
             >
               Submit
             </button>
+            <ToastContainer />
           </form>
         </div>
       </ScrollArea>

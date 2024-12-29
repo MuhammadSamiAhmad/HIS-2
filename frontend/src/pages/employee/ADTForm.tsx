@@ -56,7 +56,7 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     console.log("Submitted data:", data);
     try {
-      const response = await axios.post("http://localhost:3307/HL7Messages/adt", { data });
+      const response = await axios.post("http://localhost:3307/HL7Messages/adt", data);
       // Handle success if needed
       toast.success("Message sent successfully!");
     } catch (error) {

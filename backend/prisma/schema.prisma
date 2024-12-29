@@ -193,9 +193,9 @@ model ItemPurchaseDetails {
   purchaseDate  DateTime @default(now())
   cost          Float
   quantity      Int
-  employeeSsn   String
-  purchaseItems Employee @relation(fields: [employeeSsn], references: [employeeSSN], onDelete: Cascade)
-  item          Item     @relation(fields: [itemID], references: [itemID], onDelete: Cascade)
+  employeeSsn   String?
+  purchaseItems Employee? @relation(fields: [employeeSsn], references: [employeeSSN], onDelete: Cascade)
+  item          Item?     @relation(fields: [itemID], references: [itemID], onDelete: Cascade)
 
   @@index([employeeSsn], map: "ItemPurchaseDetails_employeeSsn_fkey")
   @@index([itemID], map: "ItemPurchaseDetails_itemID_fkey")

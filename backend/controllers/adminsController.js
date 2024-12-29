@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const { parseISO, isValid } = require('date-fns');
+const bcrypt = require("bcrypt");
 
 const prisma = new PrismaClient()
 
@@ -111,8 +112,8 @@ const getAllPatients = async (req, res) => {
 };
 
 const createNewPatient = async (req, res) => {
-    const { fName, lName, PatientSSN, phone, email, password, confirmPassword, gender, Smoker, bloodGroup, address, InsuranceCompany, InsuranceCoverage, birthDate } = req.body;
-    console.log(req.body);
+    const { firstName, lastName, contactNumber, email, password, confirmPassword, gender, smokingStatus, bloodGroup, address, InsuranceProviderCompany, coverageRate, dateOfBirth } = req.body.data;
+    console.log(req.body.data);
 
     // Check if passwords match
     if (password !== confirmPassword) {
@@ -120,47 +121,46 @@ const createNewPatient = async (req, res) => {
     }
 
     // Validate birthDate
-    const birthDateObj = new Date(birthDate);
+    const birthDateObj = new Date(dateOfBirth);
     if (isNaN(birthDateObj)) {
         return res.status(400).json({ 'message': 'Invalid birthDate format' });
     }
 
     // Check if a patient with the given PatientSSN or email already exists
-    const existingPatientSSN = await prisma.patient.findUnique({ where: { PatientSSN } });
-    const existingPatientEmail = await prisma.patient.findUnique({ where: { email } });
+    // const existingPatientSSN = await prisma.patient.findUnique({ where: { PatientSSN } });
+    const existingPatientEmail = await prisma.patient.findUnique({ where: { email:email } });
 
-    if (existingPatientSSN) {
-        return res.status(400).json({ 'message': 'A patient with this SSN already exists' });
-    }
+    // if (existingPatientSSN) {
+    //     return res.status(400).json({ 'message': 'A patient with this SSN already exists' });
+    // }
 
     if (existingPatientEmail) {
         return res.status(400).json({ 'message': 'A patient with this email already exists' });
     }
 
     // Convert Smoker to boolean
-    const isSmoker = Smoker === 'Yes' ? true : false;
+    const isSmoker = smokingStatus === 'Yes' ? true : false;
 
     // Create new patient
     const newPatient = {
-        PatientSSN,
-        fName,
-        lName,
-        birthDate: birthDateObj.toISOString(),
-        age: new Date().getFullYear() - birthDateObj.getFullYear(), // Calculate age based on birthDate
-        gender,
-        address,
-        phone,
-        email,
-        Smoker: isSmoker, // Pass smoker status to the database
+        fName: firstName,
+        lName:lastName,
+        birthDate: new Date(dateOfBirth),
+        age: new Date().getFullYear() - new Date(dateOfBirth).getFullYear(), // Calculate age based on birthDate
+        gender: gender,
+        address: address,
+        phone: contactNumber,
+        email: email,
+        smoker: isSmoker, // Pass smoker status to the database
         alcoholIntake: false, // Set default value
-        bloodGroup,
-        InsuranceCompany, // Pass insurance company to the database
-        InsuranceCoverage, // Pass coverage rate to the database
+        bloodGroup: bloodGroup,
+        insuranceCompany: InsuranceProviderCompany, // Pass insurance company to the database
+        insuranceCoverage: String(coverageRate), // Pass coverage rate to the database
         patientProfile: { // Create ProfileLogin record
             create: {
                 username: email,
-                password,
-                userType: 'Patient',
+                password: await bcrypt.hash(password, 10),
+                userType: 'patient',
             },
         },
     };
@@ -774,7 +774,7 @@ const getAllItems = async (req, res) => {
             purchaseDetails: true,
         },
     });
-    const formattedItems= [];
+    let formattedItems= [];
     if (items.length > 0) {
         // return res.status(400).json({ 'message': 'No items found' });
     
@@ -806,37 +806,37 @@ const getAllItems = async (req, res) => {
 };
 
 const createItem = async (req, res) => {
-    const { Name, Supplier, Manufacturer, Description, Quantity, PurchaseDate, Cost } = req.body;
+    const { equipmentName, supplier, manufacturer, equipmentDescription, quantity, purchaseDate, cost } = req.body.data;
 
     try {
         // Create a new Item record
         const newItem = await prisma.item.create({
             data: {
-                Name: Name,
-                Supplier: Supplier,
-                Manufacturer: Manufacturer,
-                Description: Description,
+                name: equipmentName,
+                supplier: supplier,
+                manufacturer: manufacturer,
+                description: equipmentDescription,
                 currentTotalQuantity: 0 // Initialize currentTotalQuantity as 0
             }
         });
 
         // Get the ID of the newly created item
-        const itemId = newItem.ItemID;
+        const itemId = newItem.itemID;
 
         // Create a new ItemPurchaseDetails record
         await prisma.itemPurchaseDetails.create({
             data: {
-                ItemID: itemId,
-                Quantity: Quantity,
-                PurchaseDate: new Date(PurchaseDate),
-                Cost: Cost
+                itemID: itemId,
+                quantity: quantity,
+                purchaseDate: new Date(purchaseDate),
+                cost: cost
             }
         });
 
         // Update the currentTotalQuantity field of the Item record
         await prisma.item.update({
-            where: { ItemID: itemId },
-            data: { currentTotalQuantity: { increment: Quantity } }
+            where: { itemID: itemId },
+            data: { currentTotalQuantity: { increment: quantity } }
         });
 
         res.json({ message: "Item and associated purchase details created successfully." });
