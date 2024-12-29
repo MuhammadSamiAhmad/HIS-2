@@ -18,7 +18,8 @@ import { Droplet } from "lucide-react";
 import ScrollArea from "../../components/UI/ScrollArea";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+// import { useEffect } from "react";
 
 // Define the schema for validation
 const schema = z
@@ -81,10 +82,22 @@ export default function AddPatientForm() {
   const {
     register,
     handleSubmit,
+    // watch,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
+    // mode: "all",
+    // criteriaMode: "all",
   });
+
+  // const formValues = watch();
+
+  // //Form Debugging
+  // // Log errors and form values
+  // useEffect(() => {
+  //   console.log("Form Errors:", errors);
+  //   console.log("Form Values:", formValues);
+  // }, [errors, formValues]); // Re-run logs on errors or values change
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
