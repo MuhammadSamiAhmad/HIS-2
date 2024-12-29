@@ -33,9 +33,10 @@ function formatHL7Timestamp(date = new Date()) {
 //ADT^A04 Message
 const createAdtA04Message = async (req, res) =>{
   const data = req.body
-  console.log(data)
+  console.log(req.body)
   let message = new hl7();
   const timestamp = formatHL7Timestamp();
+
   // MSH Segment
   message.createSegment("MSH");
   message.set("MSH", {
@@ -89,7 +90,7 @@ const createAdtA04Message = async (req, res) =>{
       "AL1.4": data.allergy.reaction || "",
     });
   }
-  message = message.transform();
+
   message = message.build();
   console.log(message)
   const encryptedMessage = encryptMessage(message);
@@ -143,7 +144,7 @@ const createSchS12Message = async (req, res) =>{
   "SCH.2": data.startTime,
   "SCH.3": data.endTime,
   "SCH.4": data.duration,
-  "SCH.5": data.practitionerName,
+  "SCH.5": data.practitionerFName,
   "SCH.6": data.appointmentType,
   "SCH.7": data.status,
 })

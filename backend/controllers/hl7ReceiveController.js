@@ -74,7 +74,6 @@ const segments = rawMessage.split('\r\n');
  return extractedData 
 };
 
-
 function extractAdtA04Data(segments) {
   const extractedData = {};
 
@@ -174,7 +173,6 @@ function extractOrmO01Data(segments) {
 
   return extractedData;
 }
-
 
 function extractOruR01Data(segments) {
     const extractedData = {};
