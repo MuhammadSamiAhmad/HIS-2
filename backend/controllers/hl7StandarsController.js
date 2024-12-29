@@ -144,7 +144,7 @@ const createSchS12Message = async (req, res) =>{
   "SCH.2": data.startTime,
   "SCH.3": data.endTime,
   "SCH.4": data.duration,
-  "SCH.5": data.practitionerFName,
+  "SCH.5": data.practitionerName,
   "SCH.6": data.appointmentType,
   "SCH.7": data.status,
 })
