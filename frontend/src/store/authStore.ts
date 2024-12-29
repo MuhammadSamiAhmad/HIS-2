@@ -15,7 +15,7 @@ interface AuthState {
   // `token`: Stores the authentication token (e.g., JWT). It can also be:
   //   - Undefined (pending state)
   //   - Null (no token available)
-  token?: string | null;
+  // token?: string | null;
 
   // `isAuthenticated`: Boolean to indicate whether the user is logged in or not
   isAuthenticated: boolean;
@@ -23,7 +23,7 @@ interface AuthState {
   // `login`: Function to log the user in. Accepts:
   //   - `currentUserData`: User object to set as `currentUser`
   //   - `token`: String representing the authentication token
-  login: (currentUserData: User, token: string) => void;
+  login: (currentUserData: User) => void;
 
   // `logout`: Function to log the user out. Resets the authentication state
   logout: () => void;
@@ -37,14 +37,14 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       // Initial state when the app loads
       currentUser: null, // No user logged in by default
-      token: null, // No token available
+      // token: null, // No token available
       isAuthenticated: false, // User is not authenticated initially
 
       // `login` function: Updates the state when the user logs in
-      login: (currentUserData, token) =>
+      login: (currentUserData) =>
         set(() => ({
           currentUser: currentUserData, // Set the user data
-          token, // Set the token
+          // token, // Set the token
           isAuthenticated: true, // Mark the user as authenticated
         })),
 
@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () =>
         set(() => ({
           currentUser: null, // Clear the user data
-          token: null, // Clear the token
+          // token: null, // Clear the token
           isAuthenticated: false, // Mark the user as not authenticated
         })),
     }),
@@ -69,7 +69,7 @@ export const useAuthStore = create<AuthState>()(
       // Here, only `currentUser` and `token` are persisted
       partialize: (state) => ({
         currentUser: state.currentUser,
-        token: state.token,
+        // token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
     }

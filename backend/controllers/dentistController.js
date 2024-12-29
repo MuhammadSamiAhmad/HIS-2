@@ -32,42 +32,71 @@ const prisma = new PrismaClient();
 //   }
 // };
 
-
 const getReservations = async (req, res) => {
+  const user = req.query.user;
+  const { id } = user;
+  console.log(user)
   try {
-    const reservations = await prisma.visit.findMany({
-      include: {
-        patient: {
-          select: {
-            patientID: true,
-            fName: true,
-            lName: true,
-          },
-        },
-        procedures: true,  //check if any procedures exist
-        consultations: true,  //check if any consultations exist
-      },
+    const allAppointments = await prisma.visit.findMany({
+      where: {dentistSsn: String(id) },
+      include: { reserve: true },
     });
-    const transformedReservations = reservations.map((reservation) => {
-      let service = 'Examination';
-      if (reservation.procedures.length > 0) {
-        service = 'Surgery';  
-      } else if (reservation.consultations.length > 0) {
-        service = 'Consultancy'; 
-      }
-      return {
-        patientID: reservation.patient.patientID,
-        patientName: `${reservation.patient.fName} ${reservation.patient.lName}`,
-        category : service ,  
-        date: reservation.date?.toISOString().split('T')[0],
-      };
-    });
-    res.status(200).json(transformedReservations);
+    const appointments = await getRequiredAppointmentsAttributes(allAppointments);
+    res.json(appointments);
   } catch (error) {
-    console.error('Error fetching reservations:', error);
-    res.status(500).json({ message: 'Failed to fetch reservations.' });
+    console.error("Error registering patient:", error);
+    res
+    .status(500)
+    .json({ message: "An error occurred while processing your request." });
+  } finally {
+    await prisma.$disconnect(); // Disconnect Prisma client
   }
 };
+
+async function getRequiredAppointmentsAttributes(appointmentsList) {
+  const upcomingAppointments = [];
+  const pastAppointments = [];
+  const currentDate = new Date();
+  
+  if (appointmentsList.length > 0) {
+    for (const visit of appointmentsList) {
+      const { id, date, time, reserve: patient, serviceName, invoice } = visit;
+      const patientName = `Dr. ${patient.fName} ${patient.lName}`;
+      const patientImage = patient.personalImageURL;
+      const appointmentDate = date.toISOString().split("T")[0];
+      const startTime = time.split("-")[0]; // Extract start time
+      const appointmentTime = startTime.replace(/^0+/, ""); // Remove leading zeros
+      const dateTime = `${appointmentDate}, ${appointmentTime}`;
+      const category = serviceName;
+      
+      const appointmentDetails = {
+        id,
+        patientName,
+        patientImage,
+        category,
+        dateTime,
+      };
+
+      // Determine if the appointment is upcoming or past
+      if (
+        visit.status === "Scheduled" && 
+        date > currentDate
+      ) {
+        upcomingAppointments.push(appointmentDetails);
+      } else if (
+        visit.status === "Completed" || 
+        visit.status === "Cancelled"
+      ) {
+        pastAppointments.push(appointmentDetails);
+      }
+    }
+  }
+
+  return {
+    upcoming: upcomingAppointments,
+    past: pastAppointments,
+  };
+    }
 
 const saveMedicalRecord = async (req, res) => {
   const { patientId } = req.params;
@@ -117,23 +146,41 @@ const saveMedicalRecord = async (req, res) => {
   }
 };
 
-
-
 // all patients for the Patients Tab
 const getPatients = async (req, res) => {
+  const user = req.query.user;
+  const { id } = user;
+  // console.log(user)
   try {
-    const patients = await prisma.patient.findMany({
-      select: {
-        patientID: true,
-        fName: true,
-        lName: true,
-      },
+    let patientsDetails = [];
+    const allAppointments = await prisma.visit.findMany({
+      where: {dentistSsn: String(id) },
+      include: { reserve: true },
     });
-    const transformedPatients = patients.map((patient) => ({
-      patientID: patient.patientID,
-      patientName: `${patient.fName} ${patient.lName}`,
-    }));
-    res.status(200).json(transformedPatients);
+    console.log(allAppointments)
+    if (allAppointments.length > 0) {
+      for (const visit of allAppointments) {
+        const {reserve: patient} = visit;
+        const patientName = `${patient.fName} ${patient.lName}`;
+        const patientImage = patient.personalImageURL;
+        const age = patient.age;
+        const id = patient.patientID;
+        const gender = patient.gender;
+        const bloodGroup = patient.bloodGroup;
+        
+        const singlePatient = {
+          id,
+          patientName,
+          patientImage,
+          age,
+          gender,
+          bloodGroup,
+        };
+        patientsDetails.push(singlePatient);
+      }
+    }
+    console.log(patientsDetails);
+    res.status(200).json(patientsDetails);
   } catch (error) {
     console.error('Error fetching patients:', error);
     res.status(500).json({ message: 'Failed to fetch patients.' });

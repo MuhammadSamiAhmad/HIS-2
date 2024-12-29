@@ -36,8 +36,9 @@ export default function EmployeePatients() {
         <div className="ml-20 flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
-              // src={`../../../public/${params.row.patientImage}`}
+              // src={Image}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/patient/${params.row.patientImage}`}
               alt={params.row.patientName}
               className="w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-1"
             />

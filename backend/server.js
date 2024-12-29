@@ -1,5 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
 
 const prisma = new PrismaClient();
 const app = express();
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
 
 
 app.use('/register', require('./routes/register'));
+app.use('/login', require('./routes/login'));
 
 app.use('/HL7Messages', require('./routes/HL7Messages'))
 

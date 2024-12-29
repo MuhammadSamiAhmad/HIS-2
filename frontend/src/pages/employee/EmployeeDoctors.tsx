@@ -38,8 +38,9 @@ export default function EmployeeDoctors() {
         <div className="flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
-              // src={`../../../public/doctors/${params.row.doctorImage}`}
+              // src={Image}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/doctor/${params.row.doctorImage}`}
               alt={params.row.doctorName}
               className="ml-10 w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />

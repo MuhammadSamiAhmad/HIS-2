@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FaUserAlt, FaLock } from "react-icons/fa";
 import { useAuthStore } from "../store/authStore";
 import { signInUser, MOCK_USERS } from "../utils/mockAuth";
-// import axios from "axios";
+import axios from "axios";
 
 const schema = z.object({
   email: z.string().email("Invalid email"),
@@ -28,12 +28,34 @@ const SignInPage = () => {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    const response = await signInUser(data.email, data.password);
-    login(response.user, response.token);
+  // const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    // const response = await signInUser(data.email, data.password);
+    // login(response.user, response.token);
 
+  //   // Redirect based on user role
+  //   switch (response.user.role) {
+  //     case "admin":
+  //       navigate("/admin-dashboard");
+  //       break;
+  //     case "doctor":
+  //       navigate("/doctor-reservations");
+  //       break;
+  //     case "patient":
+  //       navigate("/patient-reservations");
+  //       break;
+  //     default:
+  //       throw new Error("Invalid user role");
+  //   }
+  // };
+
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    const response = await axios.post("http://localhost:3307/login", {username: data.email, password: data.password});
+    // const {user, role} = response.data;
+    console.log(response.data);
+    sessionStorage.setItem('user', JSON.stringify(response.data));
+    login(response.data);
     // Redirect based on user role
-    switch (response.user.role) {
+    switch (response.data.role) {
       case "admin":
         navigate("/admin-dashboard");
         break;

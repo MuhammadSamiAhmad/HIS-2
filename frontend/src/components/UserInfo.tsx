@@ -29,7 +29,7 @@ export const UserInfo: React.FC = () => {
       )}
       <div className="flex flex-row items-center justify-center border-l-2 px-4 gap-4 bg-white">
         <Avatar
-          profileImage={currentUser.profileImage}
+          profileImage={`../../public/${currentUser.role}/${currentUser.profileImage}`}
           username={currentUser.username}
         />{" "}
         {/* Pass profile image */}

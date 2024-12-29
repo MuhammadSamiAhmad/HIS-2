@@ -5,7 +5,15 @@ import { DoctorPatientRow } from "../../types/dataGridTypes";
 import Image from "../../assets/images/Me.png";
 import DoctorPatientsDialog from "./DoctorPatientsDialog";
 import DiagnoseForm from "./DiagnoseForm";
+import { patients } from "../../utils/mockHL7Data";
+// import axios from "axios";
 
+
+// const userData = sessionStorage.getItem('user');
+// const user = JSON.parse(userData);
+// console.log(user)
+// const res = await axios.get("http://localhost:3307/dentist/patients", {params: {user: user}});
+// const patients = res.data;
 export default function DoctorPatients() {
   const columns: GridColDef<DoctorPatientRow>[] = [
     {
@@ -35,7 +43,9 @@ export default function DoctorPatients() {
         <div className="ml-5 flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
+              // src={Image}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/patient/${params.row.patientImage}`}
               alt={params.row.patientName}
               className="w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />
@@ -87,6 +97,7 @@ export default function DoctorPatients() {
   return (
     <div>
       <Table columns={columns} rows={MOCK_TABLE_DATA.doctorPatients} />
+      {/* <Table columns={columns} rows={patients} /> */}
     </div>
   );
 }
