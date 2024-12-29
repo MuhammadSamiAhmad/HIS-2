@@ -3,7 +3,6 @@ import Tabs from "../../components/UI/Tabs";
 import { MOCK_TABLE_DATA } from "../../utils/mockTable";
 import { GridColDef } from "@mui/x-data-grid";
 import { DoctorAppointmentRow } from "../../types/dataGridTypes";
-import Image from "../../assets/images/Me.png";
 // import axios from "axios";
 
 // const userData = sessionStorage.getItem('user');
@@ -39,7 +38,6 @@ export default function DoctorReservations() {
         <div className="ml-20 flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              // src={Image}
               src={`../../../public/default.jpg`}
               // src={`../../../public/patient/${params.row.patientImage}`}
               alt={params.row.patientName}
