@@ -49,6 +49,10 @@ interface ORUFormProps {
   messageType: string;
 }
 
+// const res = await axios.get("http://localhost:3307/admin/hl7");
+// const {data} = res.data;
+// const patients = data;
+
 const TestResultsForm = ({ messageType }: ORUFormProps) => {
   const {
     register,

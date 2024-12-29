@@ -3,6 +3,61 @@ const { parseISO, isValid } = require('date-fns');
 
 const prisma = new PrismaClient()
 
+const getAllPatientsForHL7 = async (req, res) => {
+    try {
+      const patients = await prisma.patient.findMany({
+        select: {
+          patientID: true,
+          fName: true,
+          lName: true,
+          birthDate: true,
+          age: true,
+          gender: true,
+          bloodGroup: true,
+          address: true,
+          phone: true,
+          allergies: true,
+          personalImageURL: true,
+          // insuranceCoverage: true, // Uncomment if available
+          // emergencyContact: true, // Uncomment if available
+        },
+      });
+  
+      const formattedPatients = patients.map(patient => ({
+        id: patient.patientID,
+        patientName: `${patient.fName} ${patient.lName}`,
+        firstName: patient.fName,
+        lastName: patient.lName,
+        patientImage: patient.personalImageURL || '', // Fallback to empty string if null
+        dateOfBirth: patient.birthDate
+          ? patient.birthDate.toISOString().split('T')[0]
+          : '', // Safeguard for null birthDate
+        age: patient.age,
+        gender: patient.gender,
+        bloodGroup: patient.bloodGroup,
+        address: patient.address,
+        phone: patient.phone,
+        allergies: patient.allergies,
+        insuranceNumber: "insuranceNumber", // Placeholder if not mapped
+        emergencyContact: "emergencyContact", // Placeholder if not mapped
+      }));
+  
+      return res.status(200).json({
+        success: true,
+        data: formattedPatients,
+      });
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to fetch patients',
+        error: error.message,
+      });
+    } finally {
+      await prisma.$disconnect();
+    }
+};
+
 // Patients
 const getAllPatients = async (req, res) => {
     const patients = await prisma.patient.findMany();
@@ -197,17 +252,37 @@ const deletePatient = async (req, res) => {
   
 // Doctors
 const getAllDoctors = async (req, res) => {
-    let doctors = await prisma.dentist.findMany();
+    let doctors = await prisma.dentist.findMany({
+        select: {
+          dentistSSN: true,
+          fName: true,
+          lName: true,
+          age: true,
+          email: true,
+          gender: true,
+          personalImageURL: true,
+        },
+      });
 
     if (doctors.length === 0) {
         return res.status(400).json({ 'message': 'No doctors found' });
     }
 
+    // // Add degreeOfSpecialization field and format birthDate for each doctor
+    // doctors = doctors.map(doctor => ({
+    //     ...doctor,
+    //     degreeOfSpecialization: `${doctor.degree} in ${doctor.specialization}`,
+    //     birthDate: new Date(doctor.birthDate).toISOString().split('T')[0],
+    // }));
     // Add degreeOfSpecialization field and format birthDate for each doctor
     doctors = doctors.map(doctor => ({
-        ...doctor,
-        degreeOfSpecialization: `${doctor.degree} in ${doctor.specialization}`,
-        birthDate: new Date(doctor.birthDate).toISOString().split('T')[0],
+        id: parseInt(doctor.dentistSSN),
+        doctorName: `Dr. ${doctor.fName} ${doctor.lName}`,
+        doctorImage: doctor.personalImageURL,
+        age: doctor.age,
+        gender: doctor.gender,
+        email:doctor.email,
+        status: "Available",
     }));
 
     res.json(doctors);
@@ -935,6 +1010,7 @@ const updateServiceCosts = async (req, res) => {
 
 module.exports = {
     getAllPatients,
+    getAllPatientsForHL7,
     createNewPatient,
     updatePatient,
     deletePatient,

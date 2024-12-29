@@ -4,6 +4,13 @@ import { GridColDef } from "@mui/x-data-grid";
 import { AdminDoctorRow } from "../../types/dataGridTypes";
 import Image from "../../assets/images/Me.png";
 import AddDoctorForm from "./AddDoctorForm";
+import axios from "axios";
+
+
+// const res = await axios.get("http://localhost:3307/admin/doctors");
+// const doctors = res.data;
+// // const doctors = data;
+// console.log(doctors);
 
 export default function EmployeeDoctors() {
   const columns: GridColDef<AdminDoctorRow>[] = [
@@ -32,6 +39,7 @@ export default function EmployeeDoctors() {
           <div className="flex flex-row justify-start items-center gap-3">
             <img
               src={Image}
+              // src={`../../../public/doctors/${params.row.doctorImage}`}
               alt={params.row.doctorName}
               className="ml-10 w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />
@@ -80,6 +88,7 @@ export default function EmployeeDoctors() {
   return (
     <div className="flex flex-col xl:w-[1600px] items-end">
       <AddDoctorForm />
+      {/* <Table columns={columns} rows={doctors} /> */}
       <Table columns={columns} rows={MOCK_TABLE_DATA.adminDoctors} />
     </div>
   );

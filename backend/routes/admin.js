@@ -46,4 +46,7 @@ router.route('/purchases/:itemId')
 router.route('/services')
     .post(adminsControllers.updateServiceCosts)
 
+router.route('/hl7')
+    .get(adminsControllers.getAllPatientsForHL7)
+
 module.exports = router;

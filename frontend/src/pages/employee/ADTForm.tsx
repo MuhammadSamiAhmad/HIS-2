@@ -34,6 +34,10 @@ interface ADTFormProps {
   messageType: string;
 }
 
+// const res = await axios.get("http://localhost:3307/admin/hl7");
+// const {data} = res.data;
+// const patients = data;
+
 const ADTForm = ({ messageType }: ADTFormProps) => {
   const {
     register,

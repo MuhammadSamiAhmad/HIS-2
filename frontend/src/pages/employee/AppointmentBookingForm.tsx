@@ -3,6 +3,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { patients } from "../../utils/mockHL7Data";
 import { Autocomplete, TextField } from "@mui/material";
+import axios from "axios";
 
 const schema = z.object({
   patient: z.string().nonempty("Please select a patient"),
@@ -37,6 +38,10 @@ type FormFields = z.infer<typeof schema>;
 interface SCHFormProps {
   messageType: string;
 }
+
+// const res = await axios.get("http://localhost:3307/admin/hl7");
+// const {data} = res.data;
+// const patients = data;
 
 const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
   const {

@@ -39,6 +39,11 @@ type FormFields = z.infer<typeof schema>;
 interface ORMFormProps {
   messageType: string;
 }
+
+// const res = await axios.get("http://localhost:3307/admin/hl7");
+// const {data} = res.data;
+// const patients = data;
+
 const LabTestOrderForm = ({ messageType }: ORMFormProps) => {
   const {
     register,
