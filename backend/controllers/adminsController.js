@@ -265,8 +265,8 @@ const deletePatient = async (req, res) => {
       console.error(error);
       res.status(500).json({ 'message': 'An error occurred while deleting the patient and related records' });
     }
-  }
-  
+}
+
 // Doctors
 const getAllDoctors = async (req, res) => {
     let doctors = await prisma.dentist.findMany({
@@ -306,7 +306,7 @@ const getAllDoctors = async (req, res) => {
 };
 
 const createNewDoctor = async (req, res) => {
-    const { DentistSSN, fName, lName, birthDate, gender, phone, email, specialization, yearsOfExperience, address, degree, personalImageURL, password, confirmPassword, workingDays, workingHours } = req.body;
+    const { DentistSSN, firstName, lastName, dateOfBirth, gender, contactNumber, email, specialization, yearsOfExperience, address, degree, personalImageURL, password, reenterPassword, workingDays, workingHours } = req.body;
   
     // First, check if the passwords match
     if (password !== confirmPassword) {
@@ -314,8 +314,8 @@ const createNewDoctor = async (req, res) => {
     }
   
     // Convert birthDate to a Date object and then to an ISO string
-    let birthDateObj = new Date(birthDate);
-    let birthDateISO = birthDateObj.toISOString();
+    let birthDateObj = new Date(dateOfBirth);
+    // let birthDateISO = birthDateObj.toISOString();
   
     // Calculate age from birthDate
     const age = new Date().getFullYear() - birthDateObj.getFullYear();
@@ -368,9 +368,9 @@ const createNewDoctor = async (req, res) => {
   
     // Return a JSON object
     res.json(dentist);
-  };
-      
-  const updateDoctor = async (req, res) => {
+};
+
+const updateDoctor = async (req, res) => {
     const oldDentistSsn = req.body.oldDentistSSN;
     const newDentistSsn = req.body.newDentistSSN;
     const { fName, lName, phone, specialization, degree, email, gender, address, birthDate } = req.body;
@@ -740,8 +740,8 @@ const getAllInvoices = async (req, res) => {
     });
   
     res.json(invoiceDetails);
-  };
-  
+};
+
 const toggleInvoiceStatus = async (req, res) => {
 const invoiceId = Number(req.params.invoiceId); // Get invoiceId from request parameters
 
@@ -765,7 +765,7 @@ try {
       console.error("An error occurred while updating invoice status:", error);
       res.status(500).json({ error: "An error occurred while updating invoice status." });
     }
-  };  
+};  
 
 // Items
 const getAllItems = async (req, res) => {
@@ -867,9 +867,9 @@ const updateItem = async (req, res) => {
       console.error("An error occurred while updating item:", error);
       res.status(500).json({ error: "An error occurred while updating item." });
     }
-  };
-    
-  const deleteItem = async (req, res) => {
+};
+
+const deleteItem = async (req, res) => {
     const itemId = parseInt(req.params.itemId, 10); // Convert itemId to integer
 
     if (isNaN(itemId)) {
@@ -927,9 +927,9 @@ const getItemPurchaseDetails = async (req, res) => {
       console.error("An error occurred while retrieving item purchase details:", error);
       res.status(500).json({ error: "An error occurred while retrieving item purchase details." });
     }
-  };
-  
-  const createPurchase = async (req, res) => {
+};
+
+const createPurchase = async (req, res) => {
     const { quantity, cost, purchaseDate } = req.body;
     const { itemId } = req.params; // Get itemId from request parameters
 

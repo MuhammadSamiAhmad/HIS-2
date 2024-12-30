@@ -123,8 +123,48 @@ const createAdtA04Message = async (req, res) =>{
 // SCH^S12 Message
 const createSchS12Message = async (req, res) =>{
   const {data} = req.body
-
+  let appointmentID;
   console.log(`pID : ${data.patientID}`)
+  // -----------------------------------------------
+  const doctor = await prisma.dentist.findFirst({
+    where: {
+      fName: {
+        contains: data.practitionerName.split(' ')[1], // Partial match
+        // mode: 'insensitive' // Case-insensitive search
+      }
+    }
+  });
+  // Use a transaction for atomic operations
+  const result = await prisma.$transaction(async (prisma) => {
+    // Create a visit
+    const visit = await prisma.visit.create({
+      data: {
+        date: new Date(data.startTime.split('T')[0]),
+        time: data.startTime.split('T')[1],
+        status: "Scheduled",
+        patientId: parseInt(data.patientID),
+        dentistSsn: doctor.dentistSSN,
+        serviceName: data.appointmentType,
+      },
+    });
+    appointmentID = String(visit.id);
+    const cost = data.appointmentType==="EXAMINE"?300.0:data.appointmentType==="SURGERY"?1000.0:100.0;
+    // If the service requires an automatic invoice creation
+      await prisma.invoice.create({
+        data: {
+          date: new Date(),
+          totalCost: cost,
+          status: "Unpaid",
+          visit: {
+            connect: { id: visit.id } // Replace `id` with the unique field of your `Visit` model
+          },
+          patientInvoice:{
+            connect: {patientID: parseInt(data.patientID)}
+          }
+        },
+      });
+    })
+  // -----------------------------------------------
   //  const diagnosis = await prisma.diagnosis.findUnique({
   //   where: {
   //     patientId: data.patientID, 
@@ -162,8 +202,8 @@ const createSchS12Message = async (req, res) =>{
   // SCH Segment
   message.createSegment("SCH");
   message.set('SCH',{
-  // "SCH.1": appointmentID,
-  "SCH.1": data.appointmentID,
+  // "SCH.1": data.appointmentID,
+  "SCH.1": appointmentID,
   "SCH.2": data.startTime,
   "SCH.3": data.endTime,
   "SCH.4": data.duration,
@@ -173,16 +213,18 @@ const createSchS12Message = async (req, res) =>{
 })
 
   // PID Segment
-  message.createSegment("PID",{
+  message.createSegment("PID");
+  message.set("PID",{
   "PID.1": `${data.patientID}^^^${data.sendingFacility}`,
   "PID.2": `${data.lName}^${data.fName}`,
   "PID.3": data.dob,
   "PID.4": data.gender,})
 
   // AIG Segment
-  message.createSegment("AIG",{
-    "AIG.1": `${data.practitionerName}^${data.practitionerLName}`,
-    "AIG.2": data.practitionerId,
+  message.createSegment("AIG")
+  message.set("AIG",{
+    "AIG.1": `${data.practitionerName}^${doctor.lName}`,
+    "AIG.2": doctor.dentistSSN,
     "AIG.3": data.appointmentType,})
 
   message = message.build();

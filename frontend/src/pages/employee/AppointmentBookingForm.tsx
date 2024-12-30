@@ -1,7 +1,7 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { patients } from "../../utils/mockHL7Data";
+// import { patients } from "../../utils/mockHL7Data";
 import { Autocomplete, TextField } from "@mui/material";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from "react-toastify";
@@ -41,9 +41,9 @@ interface SCHFormProps {
   messageType: string;
 }
 
-// const res = await axios.get("http://localhost:3307/admin/hl7");
-// const {data} = res.data;
-// const patients = data;
+const res = await axios.get("http://localhost:3307/admin/hl7");
+const {data} = res.data;
+const patients = data;
 
 const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
   const {
@@ -103,10 +103,15 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
   //   console.log("Form Values:", formValues);
   // }, [errors, formValues]); // Re-run logs on errors or values change
 
+  // const appointmentTypeOptions = [
+  //   { label: "Consultation", value: "CONSULT" },
+  //   { label: "Follow-up", value: "FOLLOWUP" },
+  //   { label: "Emergency", value: "EMERGENCY" },
+  // ];
   const appointmentTypeOptions = [
     { label: "Consultation", value: "CONSULT" },
-    { label: "Follow-up", value: "FOLLOWUP" },
-    { label: "Emergency", value: "EMERGENCY" },
+    { label: "Examination", value: "EXAMINE" },
+    { label: "Surgery", value: "SURGERY" },
   ];
 
   const appointmentStatusOptions = [
