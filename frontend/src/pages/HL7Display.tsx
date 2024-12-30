@@ -69,6 +69,15 @@ const hl7Messages = [
   },
 ];
 
+fetch('../../../backend/hl7_messages.json')
+  .then(response => response.json())  // Automatically parses the JSON response
+  .then(jsonData => {
+    console.log(jsonData);  // Do something with the JSON data
+  })
+  .catch(error => {
+    console.error("Error fetching JSON:", error);
+  });
+
 export default function HL7Display() {
   return (
     <div className="flex items-start justify-center w-full mx-auto h-[700px] mt-2">

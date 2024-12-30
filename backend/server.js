@@ -252,39 +252,43 @@ function extractOruR01Data(segments) {
  return extractedData;
 }
 
+const FILE_PATH = path.join(__dirname, 'hl7_messages.json');
 async function saveExtractedData(messageType, data) {
-  const filePath = path.join(__dirname, 'hl7_messages.json');
 
-  let existingData = {};
-try{
-  // Check if the file exists
-  if (fs.existsSync(filePath)) {
-    // Read existing data if the file exists
-    const fileContent = await fs.promises.readFile(filePath, 'utf8');
-    existingData = JSON.parse(fileContent);
-  } else {
-    // Create an empty object if the file does not exist
-    existingData = {};
-    await fs.promises.writeFile(filePath, JSON.stringify(existingData, null, 2), 'utf8');
-    console.log(`🆕 File created: ${filePath}`);
+  const newMessage = {
+    type: messageType,
+    data: data,
+  };
+
+  let messages = [];
+
+  try {
+    // Check if file exists
+    if (fs.existsSync(FILE_PATH)) {
+      // Read existing messages
+      const fileContent = fs.readFileSync(FILE_PATH, 'utf8');
+      messages = JSON.parse(fileContent);
+    } else {
+      console.log('File does not exist. Creating a new one...');
+    }
+
+    // Check if the type already exists in the file
+    const existingMessage = messages.find(msg => msg.type === messageType);
+
+    if (existingMessage) {
+      // Append new data to the existing type
+      existingMessage.data.push(data);
+    } else {
+      // If type doesn't exist, create a new entry
+      messages.push(newMessage);
+    }
+
+    // Save updated messages back to the file
+    fs.writeFileSync(FILE_PATH, JSON.stringify(messages, null, 2), 'utf8');
+    console.log(`✅ [${messageType}] Message saved successfully.`);
+  } catch (error) {
+    console.error(`❌ Error saving message: ${error.message}`);
   }
-
-  // Ensure the messageType array exists
-  if (!existingData[messageType]) {
-    existingData[messageType] = [];
-  }
-
-  // Append the new data to the appropriate messageType array
-  existingData[messageType].push(data);
-
-  // Write the updated data back to the file
-  const jsonData = JSON.stringify(existingData, null, 2);
-  await fs.promises.writeFile(filePath, jsonData, 'utf8');
-  console.log(`✅ [${messageType}] Data saved successfully.`);
-} catch (error) {
-  console.error(`❌ Error saving data: ${error.message}`);
-  throw error;
-}
 }
 
 // ADT^A04 Endpoint
