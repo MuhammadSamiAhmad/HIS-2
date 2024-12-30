@@ -1,22 +1,98 @@
-[
-  {
-    "type": "ADT^A04",
-    "data": {
+{
+  "ADT^A04": [
+    {
       "sendingFacility": "SanOris",
       "sendingFacilityApplication": "Dental Clinic",
       "receivingFacility": "Lab",
       "receivingFacilityApplication": "LabApp",
-      "patientID": "5",
-      "patientName": "Sarah Johnson",
-      "dob": "1985-03-09",
-      "gender": "Female",
-      "address": "123 Maple Road, New York",
-      "phone": "555-234-5678",
+      "patientID": "1",
+      "patientName": "John Smith",
+      "dob": "1989-03-15",
+      "gender": "M",
+      "address": "123 Main St, Cityville, ST 12345",
+      "phone": "(555) 123-4567",
+      "allergyType": "1",
+      "allergySeverity": "",
+      "allergyReaction": ""
+    },
+    {
+      "sendingFacility": "SanOris",
+      "sendingFacilityApplication": "Dental Clinic",
+      "receivingFacility": "Lab",
+      "receivingFacilityApplication": "LabApp",
+      "patientID": "3",
+      "patientName": "Michael Brown",
+      "dob": "1979-11-30",
+      "gender": "M",
+      "address": "789 Pine Rd, Villageton, ST 34567",
+      "phone": "(555) 345-6789",
+      "allergyType": "1",
+      "allergySeverity": "Sulfa, Peanuts",
+      "allergyReaction": ""
+    },
+    {
+      "sendingFacility": "SanOris",
+      "sendingFacilityApplication": "Dental Clinic",
+      "receivingFacility": "Lab",
+      "receivingFacilityApplication": "LabApp",
+      "patientID": "3",
+      "patientName": "Michael Brown",
+      "dob": "1979-11-30",
+      "gender": "M",
+      "address": "789 Pine Rd, Villageton, ST 34567",
+      "phone": "(555) 345-6789",
       "setID": "1",
       "allergyType": "",
-      "allergyDescription": "None",
+      "allergyDescription": "Sulfa, Peanuts",
       "allergySeverity": "",
       "allergyReaction": ""
     }
-  }
-]
+  ],
+  "ORM^O01": [
+    {
+      "sendingFacility": "SanOris",
+      "sendingFacilityApplication": "Dental Clinic",
+      "receivingFacility": "Lab",
+      "receivingFacilityApplication": "LabApp",
+      "orderControlCode": "98765432",
+      "orderID": "1234567",
+      "fillerOrderNumber": "2",
+      "orderDate": "2024-12-24T08:53",
+      "orderingProvider": "Dr. Jane",
+      "testName": "CBC",
+      "testCode": "111"
+    }
+  ],
+  "SCH^S12": [
+    {
+      "sendingFacility": "SanOris",
+      "sendingFacilityApplication": "Dental Clinic",
+      "receivingFacility": "Lab",
+      "receivingFacilityApplication": "LabApp",
+      "appointmentID": "undefined",
+      "startTime": "2024-12-30T08:50",
+      "endTime": "2024-12-30T08:20",
+      "duration": "30",
+      "practitionerName": "Dr. Jane",
+      "appointmentType": "CONSULT",
+      "status": "CONFIRMED"
+    }
+  ],
+  "ORU^R01": [
+    {
+      "sendingFacility": "SanOris",
+      "sendingFacilityApplication": "Dental Clinic",
+      "receivingFacility": "Lab",
+      "receivingFacilityApplication": "LabApp",
+      "patientID": "1",
+      "testResult": "CBC",
+      "resultDate": "2025-01-01T09:00",
+      "valueType": "Numeric (NM)",
+      "code": "5555",
+      "description": "None",
+      "codingSystem": "Coded",
+      "observationValue": "3",
+      "resultStatus": "Final (F)"
+    }
+  ]
+}

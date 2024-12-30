@@ -28,7 +28,7 @@ const HL7Accordion: React.FC<HL7AccordionProps> = ({ messages }) => {
 
   return (
     <Accordion.Root
-      className="w-full max-w-2xl rounded-md bg-mauve6 shadow-md h-[700px]"
+      className="w-full rounded-md bg-mauve6 shadow-md h-[700px]"
       type="single"
       defaultValue={Object.keys(groupedMessages)[0] || ""}
       collapsible

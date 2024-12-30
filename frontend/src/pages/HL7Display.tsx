@@ -90,15 +90,6 @@ type HL7Message = {
 
 type HL7ApiResponse = Record<string, unknown[]>; // Define keys as message types and values as arrays of message objects
 
-fetch('../../../backend/hl7_messages.json')
-  .then(response => response.json())  // Automatically parses the JSON response
-  .then(jsonData => {
-    console.log(jsonData);  // Do something with the JSON data
-  })
-  .catch(error => {
-    console.error("Error fetching JSON:", error);
-  });
-
 export default function HL7Display() {
   const [hl7Messages, setHl7Messages] = useState<HL7Message[]>([]);
 
