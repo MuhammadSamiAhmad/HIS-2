@@ -4,9 +4,8 @@ import { ChevronDownIcon } from "lucide-react";
 
 // Types for the structured HL7 data
 interface HL7MessageData {
-  type: string; // Message Type (e.g., ADT^A04, SCH^S12)
-  //Record<Keys, Values>
-  data: Record<string, string | number | null | undefined>; // Allow undefined for optional fields
+  type: string;
+  data: Record<string, unknown>; // Replace with a more specific structure if available
 }
 
 interface HL7AccordionProps {
@@ -14,32 +13,58 @@ interface HL7AccordionProps {
 }
 
 // HL7Accordion Component
-const HL7Accordion: React.FC<HL7AccordionProps> = ({ messages }) => (
-  <Accordion.Root
-    className="w-full max-w-2xl rounded-md bg-mauve6 shadow-md"
-    type="single"
-    defaultValue={messages[0]?.type || ""}
-    collapsible
-  >
-    {messages.map((message) => (
-      <AccordionItem key={message.type} value={message.type}>
-        <AccordionTrigger>{message.type}</AccordionTrigger>
-        <AccordionContent>
-          <MessageDetails data={message.data} />
-        </AccordionContent>
-      </AccordionItem>
-    ))}
-  </Accordion.Root>
-);
+const HL7Accordion: React.FC<HL7AccordionProps> = ({ messages }) => {
+  // Group messages by their type
+  const groupedMessages = messages.reduce<Record<string, HL7MessageData[]>>(
+    (acc, message) => {
+      if (!acc[message.type]) {
+        acc[message.type] = [];
+      }
+      acc[message.type].push(message);
+      return acc;
+    },
+    {}
+  );
+
+  return (
+    <Accordion.Root
+      className="w-full max-w-2xl rounded-md bg-mauve6 shadow-md h-[700px]"
+      type="single"
+      defaultValue={Object.keys(groupedMessages)[0] || ""}
+      collapsible
+    >
+      {Object.entries(groupedMessages).map(([type, groupedData]) => (
+        <AccordionItem key={type} value={type}>
+          <AccordionTrigger>{type}</AccordionTrigger>
+          <AccordionContent>
+            {groupedData.map((message, index) => (
+              <div key={index} className="mb-4">
+                <MessageDetails data={message.data} />
+                {index < groupedData.length - 1 && <hr className="my-3" />}
+              </div>
+            ))}
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion.Root>
+  );
+};
 
 // Message Details Component
 const MessageDetails: React.FC<{
-  data: Record<string, string | number | null | undefined>;
+  data: Record<string, unknown>;
 }> = ({ data }) => (
   <div className="p-3 bg-gray-100 rounded-md text-sm">
     {Object.entries(data).map(([key, value]) => (
       <div key={key} className="mb-2">
-        <span className="font-semibold">{key}:</span> {value || "N/A"}
+        <span className="font-semibold">{key}:</span>{" "}
+        {typeof value === "object" && value !== null ? (
+          <pre className="bg-gray-200 p-2 rounded-md text-xs">
+            {JSON.stringify(value, null, 2)}
+          </pre>
+        ) : (
+          String(value ?? "N/A")
+        )}
       </div>
     ))}
   </div>

@@ -3,9 +3,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 // import { patients } from "../../utils/mockHL7Data";
 import { Autocomplete, TextField } from "@mui/material";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
-import axios from "axios";
+// import axios from "axios";
 // import { useEffect } from "react";
 
 const schema = z.object({
@@ -41,9 +41,9 @@ interface SCHFormProps {
   messageType: string;
 }
 
-const res = await axios.get("http://localhost:3307/admin/hl7");
-const {data} = res.data;
-const patients = data;
+// const res = await axios.get("http://localhost:3307/admin/hl7");
+// const {data} = res.data;
+// const patients = data;
 
 const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
   const {
@@ -69,14 +69,14 @@ const AppointmentBookingForm = ({ messageType }: SCHFormProps) => {
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     // Log errors and form values
     console.log("Submitted data:", data);
-    try {
-      const response = await axios.post("http://localhost:3307/HL7Messages/sch", { data });
-      // Handle success if needed
-      toast.success("Message sent successfully!");
-    } catch (error) {
-      // Show error message in the toast notification
-      toast.error("Failed to send the message: ");
-    }
+    // try {
+    //   const response = await axios.post("http://localhost:3307/HL7Messages/sch", { data });
+    //   // Handle success if needed
+    //   toast.success("Message sent successfully!");
+    // } catch (error) {
+    //   // Show error message in the toast notification
+    //   toast.error("Failed to send the message: ");
+    // }
   };
   const handlePatientSelect = (patientId: string | undefined) => {
     if (!patientId) return;

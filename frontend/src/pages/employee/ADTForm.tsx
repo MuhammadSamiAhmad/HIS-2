@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { patients } from "../../utils/mockHL7Data";
 import { Autocomplete, TextField } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-import axios from "axios";
+import "react-toastify/dist/ReactToastify.css";
+// import axios from "axios";
 import { useEffect } from "react";
 
 const schema = z.object({
@@ -43,7 +43,8 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
   const {
     register,
     handleSubmit,
-    setValue,watch,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
@@ -56,25 +57,25 @@ const ADTForm = ({ messageType }: ADTFormProps) => {
     criteriaMode: "all", // Provide detailed error messages
   });
 
-//Form Debugging
-const formValues = watch();
-//Form Debugging
-// Log errors and form values
-useEffect(() => {
-console.log("Form Errors:", errors);
-console.log("Form Values:", formValues);
-}, [errors, formValues]); // Re-run logs on errors or values change
+  //Form Debugging
+  const formValues = watch();
+  //Form Debugging
+  // Log errors and form values
+  useEffect(() => {
+    console.log("Form Errors:", errors);
+    console.log("Form Values:", formValues);
+  }, [errors, formValues]); // Re-run logs on errors or values change
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     console.log("Submitted data:", data);
-    try {
-      const response = await axios.post("http://localhost:3307/HL7Messages/adt", data);
-      // Handle success if needed
-      toast.success("Message sent successfully!");
-    } catch (error) {
-      // Show error message in the toast notification
-      toast.error("Failed to send the message: ");
-    }
+    // try {
+    //   const response = await axios.post("http://localhost:3307/HL7Messages/adt", data);
+    //   // Handle success if needed
+    //   toast.success("Message sent successfully!");
+    // } catch (error) {
+    //   // Show error message in the toast notification
+    //   toast.error("Failed to send the message: ");
+    // }
   };
 
   const handlePatientSelect = (patientId: string | undefined) => {

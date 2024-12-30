@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+// import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import {
   FaIndustry,
   FaCartPlus,
@@ -63,19 +63,19 @@ export default function AddEquipmentForm() {
   });
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log(data);
-        try {
-      const response = await axios.post("http://localhost:3307/admin/items", { data });
-      console.log(response);
-      // Handle success if needed
-      toast.success("Equipment added successfully!");
-    } catch (error) {
-      // Show error message in the toast notification
-      toast.error(`Failed to add the Equipment: ${error}`);
-      console.log(error);
-    }
-    // navigate("/success");
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // console.log(data);
+    //     try {
+    //   const response = await axios.post("http://localhost:3307/admin/items", { data });
+    //   console.log(response);
+    //   // Handle success if needed
+    //   toast.success("Equipment added successfully!");
+    // } catch (error) {
+    //   // Show error message in the toast notification
+    //   toast.error(`Failed to add the Equipment: ${error}`);
+    //   console.log(error);
+    // }
+    navigate("/success");
   };
   return (
     <SlidingDialog

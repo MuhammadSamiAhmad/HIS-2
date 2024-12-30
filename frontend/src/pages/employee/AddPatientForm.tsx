@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa";
 import { Droplet } from "lucide-react";
 import ScrollArea from "../../components/UI/ScrollArea";
-import axios from "axios";
+// import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import { useEffect } from "react";
