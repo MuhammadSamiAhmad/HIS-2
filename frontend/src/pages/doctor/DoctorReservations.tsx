@@ -3,7 +3,14 @@ import Tabs from "../../components/UI/Tabs";
 import { MOCK_TABLE_DATA } from "../../utils/mockTable";
 import { GridColDef } from "@mui/x-data-grid";
 import { DoctorAppointmentRow } from "../../types/dataGridTypes";
-import Image from "../../assets/images/Me.png";
+// import axios from "axios";
+
+// const userData = sessionStorage.getItem('user');
+// const user = JSON.parse(userData);
+// console.log(user)
+// const res = await axios.get("http://localhost:3307/dentist/reservations", {params: {user: user}});
+// console.log(res.data);
+// const {upcoming, past} = res.data;
 
 export default function DoctorReservations() {
   const columns: GridColDef<DoctorAppointmentRow>[] = [
@@ -31,7 +38,8 @@ export default function DoctorReservations() {
         <div className="ml-20 flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/patient/${params.row.patientImage}`}
               alt={params.row.patientName}
               className="w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />
@@ -87,6 +95,7 @@ export default function DoctorReservations() {
       content: (
         <Table<DoctorAppointmentRow>
           rows={MOCK_TABLE_DATA.doctorAppointments}
+          // rows={upcoming}
           columns={columns}
         />
       ),
@@ -97,6 +106,7 @@ export default function DoctorReservations() {
       content: (
         <Table<DoctorAppointmentRow>
           rows={MOCK_TABLE_DATA.doctorAppointments}
+          // rows={past}
           columns={columns}
         />
       ),

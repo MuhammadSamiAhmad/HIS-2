@@ -3,6 +3,14 @@ import { MOCK_TABLE_DATA } from "../../utils/mockTable";
 import { GridColDef } from "@mui/x-data-grid";
 import { PatientInvoiceRow } from "../../types/dataGridTypes";
 import InvoicesDialog from "./InvoicesDialog";
+// import axios from "axios";
+
+// const userData = sessionStorage.getItem('user');
+// const user = JSON.parse(userData);
+// console.log(user)
+// const res = await axios.get("http://localhost:3307/patient/invoices", {params: {user: user}});
+// console.log(res.data);
+// const {upcoming, past} = res.data;
 
 export default function PatientInvoices() {
   const invoicesColumns: GridColDef<PatientInvoiceRow>[] = [

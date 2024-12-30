@@ -35,9 +35,23 @@ const handleLogin = async (req, res) => {
   let user;
   // let accessToken;
   if (foundUser.userType === "patient") {
-    user = await prisma.patient.findFirst({
+    const patient = await prisma.patient.findFirst({
       where: { patientID: foundUser.patientId },
+      select: {
+        patientID: true,
+        email: true,
+        fName: true,
+        lName: true,
+      },
     });
+    user = {
+      id: patient.patientID,
+      email: patient.email,
+      username: `${patient?.fName || ''} ${patient?.lName || ''}`,
+      profileImage: patient.personalImageURL,
+      role: "patient",
+    }
+    // user.role = "patient";
     // accessToken = sign(
     //   { username: userName, id: user.patientID },
     //   process.env.ACCESS_TOKEN_SECRET,
@@ -49,9 +63,16 @@ const handleLogin = async (req, res) => {
     //   { expiresIn: "1d" }
     // );
   } else if (foundUser.userType === "doctor") {
-    user = await prisma.dentist.findFirst({
+    const doctor = await prisma.dentist.findFirst({
       where: { dentistSSN: foundUser.dentistSsn },
     });
+    user = {
+      id: parseInt(doctor.dentistSSN),
+      email: doctor.email,
+      username: `${doctor?.fName || ''} ${doctor?.lName || ''}`,
+      profileImage: doctor.personalImageURL,
+      role: "doctor",
+    }
     // accessToken = sign(
     //   { username: userName, id: user.DentistSSN },
     //   process.env.ACCESS_TOKEN_SECRET,
@@ -63,9 +84,17 @@ const handleLogin = async (req, res) => {
     //   { expiresIn: "1d" }
     // );
   } else {
-    user = await prisma.employee.findFirst({
+    const employee = await prisma.employee.findFirst({
       where: { EmployeeSSN: foundUser.employeeSsn },
     });
+
+    user = {
+      id: parseInt(employee.employeeSSN),
+      email: employee.email,
+      username: `${employee?.fName || ''} ${employee?.lName || ''}`,
+      profileImage: employee.personalImageURL,
+      role: "admin",
+    }
     // accessToken = sign(
     //   { username: userName, id: user.EmployeeSSN },
     //   process.env.ACCESS_TOKEN_SECRET,
@@ -78,7 +107,7 @@ const handleLogin = async (req, res) => {
     // );
   }
   console.log(user);
-  res.status(200).json({user, role: foundUser.userType});
+  res.status(200).json(user);
   //------------------------should be a field in the database for each user------------------------------------
   // user.refreshToken = refreshToken
   // res.json(accessToken);

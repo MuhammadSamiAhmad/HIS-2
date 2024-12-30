@@ -344,12 +344,12 @@ const deleteAppointment = async (req, res) => {
 };
 
 const getAppointments = async (req, res) => {
-  const patient = JSON.parse(req.query.patient);
+  const patient = req.query.user;
   console.log(patient);
-  const { patientID } = patient;
+  const { id } = patient;
   try {
     const allAppointments = await prisma.visit.findMany({
-      where: {patientId: patientID },
+      where: {patientId: parseInt(id) },
       include: { sets: true },
     });
     const appointments = await getRequiredAppointmentsAttributes(allAppointments);

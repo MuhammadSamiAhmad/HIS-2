@@ -2,13 +2,20 @@ import Table from "../../components/UI/Table";
 import Tabs from "../../components/UI/Tabs";
 import { MOCK_TABLE_DATA } from "../../utils/mockTable";
 import { GridColDef } from "@mui/x-data-grid";
-import Image from "../../assets/images/Me.png";
 import {
   PatientUpcomingVisitRow,
   PatientPastVisitRow,
 } from "../../types/dataGridTypes";
 import PatientReservationDialog from "./PatientReservationDialog";
 import PatientReservationForm from "./PatientReservationForm";
+// import axios from "axios";
+
+// const userData = sessionStorage.getItem('user');
+// const user = JSON.parse(userData);
+// console.log(user)
+// const res = await axios.get("http://localhost:3307/patient/appointments", {params: {user: user}});
+// console.log(res.data);
+// const {upcoming, past} = res.data;
 
 export default function PatientReservations() {
   // Define columns with proper typing
@@ -37,7 +44,8 @@ export default function PatientReservations() {
         <div className="flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/doctor/${params.row.dentistImage}`}
               alt={params.row.dentistName}
               className="ml-10 w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />
@@ -136,7 +144,8 @@ export default function PatientReservations() {
         <div className="flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/doctor/${params.row.dentistImage}`}
               alt={params.row.dentistName}
               className="ml-10 w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />
@@ -195,6 +204,7 @@ export default function PatientReservations() {
             <PatientReservationForm />
             <Table<PatientUpcomingVisitRow>
               rows={MOCK_TABLE_DATA.upcoming}
+              // rows={upcoming}
               columns={upcomingColumns}
             />
           </div>
@@ -207,6 +217,7 @@ export default function PatientReservations() {
       content: (
         <Table<PatientPastVisitRow>
           rows={MOCK_TABLE_DATA.past}
+          // rows={past}
           columns={pastColumns}
         />
       ),

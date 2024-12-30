@@ -6,7 +6,4 @@ router
   .route("/")
   .post(authController.handleLogin);
 
-
-// router.post('/', authController.handleLogin);
-
 module.exports = router;

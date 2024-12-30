@@ -2,7 +2,6 @@ import Table from "../../components/UI/Table";
 import { MOCK_TABLE_DATA } from "../../utils/mockTable";
 import { GridColDef } from "@mui/x-data-grid";
 import { AdminDoctorRow } from "../../types/dataGridTypes";
-import Image from "../../assets/images/Me.png";
 import AddDoctorForm from "./AddDoctorForm";
 // import axios from "axios";
 
@@ -38,8 +37,8 @@ export default function EmployeeDoctors() {
         <div className="flex flex-row items-center justify-between h-[30px]">
           <div className="flex flex-row justify-start items-center gap-3">
             <img
-              src={Image}
-              // src={`../../../public/doctors/${params.row.doctorImage}`}
+              src={`../../../public/default.jpg`}
+              // src={`../../../public/doctor/${params.row.doctorImage}`}
               alt={params.row.doctorName}
               className="ml-10 w-[45px] h-[45px] rounded-2xl object-fill border-2 border-Silver-2"
             />
