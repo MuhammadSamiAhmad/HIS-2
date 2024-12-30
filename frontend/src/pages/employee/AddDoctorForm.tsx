@@ -12,8 +12,12 @@ import {
   FaBriefcase,
   FaIdCard,
   FaClock,
+  FaHome,
+  FaEnvelope,
+  FaLock,
 } from "react-icons/fa";
 import ScrollArea from "../../components/UI/ScrollArea";
+import { useEffect } from "react";
 
 // Define the schema for validation
 const schema = z
@@ -36,13 +40,11 @@ const schema = z
     password: z.string().min(8, "Password must be at least 8 characters"),
     reenterPassword: z
       .string()
-      .min(8, "Re-enter Password must be at least 8 characters"),
+      .min(8, "Confirm Password must be at least 8 characters"),
     workingDays: z.array(z.string()).min(1, "Select at least one working day"),
     shiftStartTime: z.string().nonempty("Shift start time is required"),
     shiftEndTime: z.string().nonempty("Shift end time is required"),
-    gender: z.enum(["male", "female"], {
-      errorMap: () => ({ message: "Gender is required" }),
-    }),
+    gender: z.string().nonempty("Gender is required"),
     address: z.string().nonempty("Address is required"),
     dateOfBirth: z
       .string()
@@ -74,10 +76,22 @@ export default function AddDoctorForm() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
+    mode: "all",
+    criteriaMode: "all",
   });
+
+  const formValues = watch();
+
+  //Form Debugging
+  // Log errors and form values
+  useEffect(() => {
+    console.log("Form Errors:", errors);
+    console.log("Form Values:", formValues);
+  }, [errors, formValues]); // Re-run logs on errors or values change
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -107,7 +121,7 @@ export default function AddDoctorForm() {
               helperText={errors.firstName?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaUserAlt />
                   </span>
                 ),
@@ -125,7 +139,7 @@ export default function AddDoctorForm() {
               helperText={errors.lastName?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaUserAlt />
                   </span>
                 ),
@@ -143,7 +157,7 @@ export default function AddDoctorForm() {
               helperText={errors.contactNumber?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaPhoneAlt />
                   </span>
                 ),
@@ -161,7 +175,7 @@ export default function AddDoctorForm() {
               helperText={errors.degree?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaBriefcase />
                   </span>
                 ),
@@ -179,7 +193,7 @@ export default function AddDoctorForm() {
               helperText={errors.specialization?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaIdCard />
                   </span>
                 ),
@@ -197,7 +211,7 @@ export default function AddDoctorForm() {
               helperText={errors.ssn?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaIdCard />
                   </span>
                 ),
@@ -205,9 +219,120 @@ export default function AddDoctorForm() {
               sx={{ mb: 2 }}
             />
 
+            {/* Email */}
+            <TextField
+              {...register("email")}
+              label="Email"
+              variant="outlined"
+              fullWidth
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 mr-2 text-gray-400">
+                    <FaEnvelope />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
+
+            {/* Password */}
+            <TextField
+              {...register("password")}
+              label="Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 mr-2 text-gray-400">
+                    <FaLock />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
+
+            {/* Confirm Password */}
+            <TextField
+              {...register("reenterPassword")}
+              label="Confirm Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              error={!!errors.reenterPassword}
+              helperText={errors.reenterPassword?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 mr-2 text-gray-400">
+                    <FaLock />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
+
+            {/* Address */}
+            <TextField
+              {...register("address")}
+              label="Address"
+              variant="outlined"
+              fullWidth
+              error={!!errors.address}
+              helperText={errors.address?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 mr-2 text-gray-400">
+                    <FaHome />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
+
+            {/* Date of Birth */}
+            <TextField
+              {...register("dateOfBirth")}
+              label="Date of Birth"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              error={!!errors.dateOfBirth}
+              helperText={errors.dateOfBirth?.message}
+              sx={{ mb: 2 }}
+            />
+
+            {/* Gender */}
+            <Autocomplete
+              options={["male", "female"]}
+              disablePortal
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Gender"
+                  error={!!errors.gender}
+                  helperText={errors.gender?.message}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <span className="ml-2 mr-2 text-gray-400">
+                        <FaUserAlt />
+                      </span>
+                    ),
+                  }}
+                />
+              )}
+              onChange={(_, value) => setValue("gender", value || "")}
+              sx={{ mb: 2 }}
+            />
+
             {/* Working Days */}
             <Autocomplete
               multiple
+              disablePortal
               options={workingDayOptions}
               renderInput={(params) => (
                 <TextField
@@ -218,7 +343,7 @@ export default function AddDoctorForm() {
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
-                      <span className="ml-2 text-gray-400">
+                      <span className="ml-2 mr-2 text-gray-400">
                         <FaCalendarAlt />
                       </span>
                     ),
@@ -240,7 +365,7 @@ export default function AddDoctorForm() {
               helperText={errors.shiftStartTime?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaClock />
                   </span>
                 ),
@@ -259,7 +384,7 @@ export default function AddDoctorForm() {
               helperText={errors.shiftEndTime?.message}
               InputProps={{
                 startAdornment: (
-                  <span className="ml-2 text-gray-400">
+                  <span className="ml-2 mr-2 text-gray-400">
                     <FaClock />
                   </span>
                 ),
