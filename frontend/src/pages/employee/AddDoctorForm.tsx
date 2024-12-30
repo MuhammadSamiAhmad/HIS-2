@@ -1,19 +1,10 @@
+import { TextField, Autocomplete } from "@mui/material";
 import SlidingDialog from "../../components/UI/SlidingDialog";
 import AddIcon from "../../assets/images/add-1--expand-cross-buttons-button-more-remove-plus-add-+-mathematics-math.svg";
 import { useNavigate } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FaUserAlt,
-  FaPhoneAlt,
-  FaEnvelope,
-  FaLock,
-  FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaBriefcase,
-} from "react-icons/fa";
-// import { useEffect } from "react";
 
 // Define the schema for validation
 const schema = z
@@ -30,11 +21,16 @@ const schema = z
       .string()
       .regex(/^\+?[0-9]{10,15}$/, "Invalid contact number"),
     degree: z.string().nonempty("Degree is required"),
+    specialization: z.string().nonempty("Specialization is required"),
+    ssn: z.string().regex(/^[0-9]{9}$/, "SSN must be a 9-digit number"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     reenterPassword: z
       .string()
       .min(8, "Re-enter Password must be at least 8 characters"),
+    workingDays: z.array(z.string()).min(1, "Select at least one working day"),
+    shiftStartTime: z.string().nonempty("Shift start time is required"),
+    shiftEndTime: z.string().nonempty("Shift end time is required"),
     gender: z.enum(["male", "female"], {
       errorMap: () => ({ message: "Gender is required" }),
     }),
@@ -46,39 +42,33 @@ const schema = z
       })
       .transform((date) => new Date(date)),
   })
-  .superRefine((data, ctx) => {
-    if (data.password !== data.reenterPassword) {
-      ctx.addIssue({
-        code: "custom", // Specify the issue type
-        path: ["reenterPassword"], // Path to indicate the field with the error
-        message: "Passwords must match",
-      });
-    }
+  .refine((data) => data.password === data.reenterPassword, {
+    message: "Passwords must match",
+    path: ["reenterPassword"],
   });
 
 type FormFields = z.infer<typeof schema>;
 
+const workingDayOptions = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
 export default function AddDoctorForm() {
-  const navigate = useNavigate(); // For navigation
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
-    // watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
     resolver: zodResolver(schema),
-    // mode: "all",
-    // criteriaMode: "all",
   });
-
-  // const formValues = watch();
-
-  //Form Debugging
-  // // Log errors and form values
-  // useEffect(() => {
-  //   console.log("Form Errors:", errors);
-  //   console.log("Form Values:", formValues);
-  // }, [errors, formValues]); // Re-run logs on errors or values change
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -98,156 +88,110 @@ export default function AddDoctorForm() {
       <div className="font-manrope w-full max-w-md mx-auto mt-16">
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* First Name */}
-          <div className="relative mb-4">
-            <FaUserAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("firstName")}
-              type="text"
-              placeholder="First Name"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.firstName && (
-            <p className="text-red-500">{errors.firstName.message}</p>
-          )}
+          <TextField
+            {...register("firstName")}
+            label="First Name"
+            variant="outlined"
+            fullWidth
+            error={!!errors.firstName}
+            helperText={errors.firstName?.message}
+            sx={{ mb: 2 }}
+          />
 
           {/* Last Name */}
-          <div className="relative mb-4">
-            <FaUserAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("lastName")}
-              type="text"
-              placeholder="Last Name"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.lastName && (
-            <p className="text-red-500">{errors.lastName.message}</p>
-          )}
+          <TextField
+            {...register("lastName")}
+            label="Last Name"
+            variant="outlined"
+            fullWidth
+            error={!!errors.lastName}
+            helperText={errors.lastName?.message}
+            sx={{ mb: 2 }}
+          />
 
           {/* Contact Number */}
-          <div className="relative mb-4">
-            <FaPhoneAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("contactNumber")}
-              type="text"
-              placeholder="Contact Number"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.contactNumber && (
-            <p className="text-red-500">{errors.contactNumber.message}</p>
-          )}
+          <TextField
+            {...register("contactNumber")}
+            label="Contact Number"
+            variant="outlined"
+            fullWidth
+            error={!!errors.contactNumber}
+            helperText={errors.contactNumber?.message}
+            sx={{ mb: 2 }}
+          />
 
           {/* Degree */}
-          <div className="relative mb-4">
-            <FaBriefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("degree")}
-              type="text"
-              placeholder="Degree"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.degree && (
-            <p className="text-red-500">{errors.degree.message}</p>
-          )}
+          <TextField
+            {...register("degree")}
+            label="Degree"
+            variant="outlined"
+            fullWidth
+            error={!!errors.degree}
+            helperText={errors.degree?.message}
+            sx={{ mb: 2 }}
+          />
 
-          {/* Email */}
-          <div className="relative mb-4">
-            <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("email")}
-              type="email"
-              placeholder="Email"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.email && (
-            <p className="text-red-500">{errors.email.message}</p>
-          )}
+          {/* Specialization */}
+          <TextField
+            {...register("specialization")}
+            label="Specialization"
+            variant="outlined"
+            fullWidth
+            error={!!errors.specialization}
+            helperText={errors.specialization?.message}
+            sx={{ mb: 2 }}
+          />
 
-          {/* Password */}
-          <div className="relative mb-4">
-            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("password")}
-              type="password"
-              placeholder="Password"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.password && (
-            <p className="text-red-500">{errors.password.message}</p>
-          )}
+          {/* SSN */}
+          <TextField
+            {...register("ssn")}
+            label="SSN"
+            variant="outlined"
+            fullWidth
+            error={!!errors.ssn}
+            helperText={errors.ssn?.message}
+            sx={{ mb: 2 }}
+          />
 
-          {/* Re-enter Password */}
-          <div className="relative mb-4">
-            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("reenterPassword")}
-              type="password"
-              placeholder="Re-enter Password"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.reenterPassword && (
-            <p className="text-red-500">{errors.reenterPassword.message}</p>
-          )}
-
-          {/* Gender */}
-          <div className="mb-4">
-            <div className="flex items-center gap-4">
-              <label className="flex items-center">
-                <input
-                  {...register("gender")}
-                  type="radio"
-                  value="male"
-                  className="mr-2"
-                />
-                Male
-              </label>
-              <label className="flex items-center">
-                <input
-                  {...register("gender")}
-                  type="radio"
-                  value="female"
-                  className="mr-2"
-                />
-                Female
-              </label>
-            </div>
-            {errors.gender && (
-              <p className="text-red-500">{errors.gender.message}</p>
+          {/* Working Days */}
+          <Autocomplete
+            multiple
+            options={workingDayOptions}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Working Days"
+                error={!!errors.workingDays}
+                helperText={errors.workingDays?.message}
+              />
             )}
-          </div>
+            onChange={(_, value) => setValue("workingDays", value)}
+            sx={{ mb: 2 }}
+          />
 
-          {/* Address */}
-          <div className="relative mb-4">
-            <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("address")}
-              type="text"
-              placeholder="Address"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.address && (
-            <p className="text-red-500">{errors.address.message}</p>
-          )}
+          {/* Shift Start Time */}
+          <TextField
+            {...register("shiftStartTime")}
+            label="Shift Start Time"
+            type="time"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            error={!!errors.shiftStartTime}
+            helperText={errors.shiftStartTime?.message}
+            sx={{ mb: 2 }}
+          />
 
-          {/* Date of Birth */}
-          <div className="relative mb-4">
-            <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              {...register("dateOfBirth")}
-              type="date"
-              className="w-full bg-Silver-6 pl-10 p-2 rounded-lg border border-Silver-2 focus:outline-none focus:ring-2 focus:ring-callToAction"
-            />
-          </div>
-          {errors.dateOfBirth && (
-            <p className="text-red-500">{errors.dateOfBirth.message}</p>
-          )}
+          {/* Shift End Time */}
+          <TextField
+            {...register("shiftEndTime")}
+            label="Shift End Time"
+            type="time"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            error={!!errors.shiftEndTime}
+            helperText={errors.shiftEndTime?.message}
+            sx={{ mb: 2 }}
+          />
 
           {/* Submit Button */}
           <button
