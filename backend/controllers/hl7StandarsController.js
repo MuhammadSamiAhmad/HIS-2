@@ -14,7 +14,7 @@ function encryptMessage(message) {
 
 const sendHL7Message = async (endpoint, message, messageType) => {
   try {
-    const response = await axios.post(`http://localhost:3001/${endpoint}`, {encryptedMessage: message, messageType:messageType});
+    const response = await axios.post(`http://localhost:3307/${endpoint}`, {encryptedMessage: message, messageType:messageType});
     console.log(`✅ [${messageType}] Message sent to /${endpoint}:`);
     // console.log(`✅ [${messageType}] Message sent to /${endpoint}:`, response.data);
   } catch (error) {
@@ -32,7 +32,6 @@ function formatHL7Timestamp(date = new Date()) {
     date.getDate()
   )}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
-
 
 //ADT^A04 Message
 const createAdtA04Message = async (req, res) =>{
@@ -79,19 +78,26 @@ const createAdtA04Message = async (req, res) =>{
     "PV1.1": "1",
     "PV1.2": data.patientClass || "O", // Default to outpatient
     "PV1.7": {
-      "PV1.7.1": data.attendingPhysician?.lName || "",
-      "PV1.7.2": data.attendingPhysician?.fName || "",
+      "PV1.7.1": data.provider || "",
+      "PV1.7.2": data.attendingPhysician?.lName || "",
     },
   });
 
   // AL1 Segment (if allergy data exists)
   if (data.allergy) {
     message.createSegment("AL1");
+    // message.set("AL1", {
+    //   "AL1.1": "1",
+    //   "AL1.2": data.allergy || "",
+    //   "AL1.3": data.allergy.severity || "",
+    //   "AL1.4": data.allergy.reaction || "",
+    // });
     message.set("AL1", {
-      "AL1.1": "1",
-      "AL1.2": data.allergy.type || "",
-      "AL1.3": data.allergy.severity || "",
-      "AL1.4": data.allergy.reaction || "",
+      "AL1.1": "1", // Set ID
+      "AL1.2": data.allergy?.type || "", // Allergy Type
+      "AL1.3": data.allergy || "", // Allergy Description
+      "AL1.4": data.allergy?.severity || "", // Allergy Severity
+      "AL1.5": data.allergy?.reaction?.join("~") || "", // Allergy Reaction
     });
   }
 
@@ -123,9 +129,9 @@ const createAdtA04Message = async (req, res) =>{
 // SCH^S12 Message
 const createSchS12Message = async (req, res) =>{
   const {data} = req.body
-  let appointmentID;
-  console.log(`pID : ${data.patientID}`)
-  // -----------------------------------------------
+  // let appointmentID;
+  // console.log(`pID : ${data.patientID}`)
+  // // -----------------------------------------------
   const doctor = await prisma.dentist.findFirst({
     where: {
       fName: {
@@ -134,37 +140,37 @@ const createSchS12Message = async (req, res) =>{
       }
     }
   });
-  // Use a transaction for atomic operations
-  const result = await prisma.$transaction(async (prisma) => {
-    // Create a visit
-    const visit = await prisma.visit.create({
-      data: {
-        date: new Date(data.startTime.split('T')[0]),
-        time: data.startTime.split('T')[1],
-        status: "Scheduled",
-        patientId: parseInt(data.patientID),
-        dentistSsn: doctor.dentistSSN,
-        serviceName: data.appointmentType,
-      },
-    });
-    appointmentID = String(visit.id);
-    const cost = data.appointmentType==="EXAMINE"?300.0:data.appointmentType==="SURGERY"?1000.0:100.0;
-    // If the service requires an automatic invoice creation
-      await prisma.invoice.create({
-        data: {
-          date: new Date(),
-          totalCost: cost,
-          status: "Unpaid",
-          visit: {
-            connect: { id: visit.id } // Replace `id` with the unique field of your `Visit` model
-          },
-          patientInvoice:{
-            connect: {patientID: parseInt(data.patientID)}
-          }
-        },
-      });
-    })
-  // -----------------------------------------------
+  // // Use a transaction for atomic operations
+  // const result = await prisma.$transaction(async (prisma) => {
+  //   // Create a visit
+  //   const visit = await prisma.visit.create({
+  //     data: {
+  //       date: new Date(data.startTime.split('T')[0]),
+  //       time: data.startTime.split('T')[1],
+  //       status: "Scheduled",
+  //       patientId: parseInt(data.patientID),
+  //       dentistSsn: doctor.dentistSSN,
+  //       serviceName: data.appointmentType,
+  //     },
+  //   });
+  //   appointmentID = String(visit.id);
+  //   const cost = data.appointmentType==="EXAMINE"?300.0:data.appointmentType==="SURGERY"?1000.0:100.0;
+  //   // If the service requires an automatic invoice creation
+  //     await prisma.invoice.create({
+  //       data: {
+  //         date: new Date(),
+  //         totalCost: cost,
+  //         status: "Unpaid",
+  //         visit: {
+  //           connect: { id: visit.id } // Replace `id` with the unique field of your `Visit` model
+  //         },
+  //         patientInvoice:{
+  //           connect: {patientID: parseInt(data.patientID)}
+  //         }
+  //       },
+  //     });
+  //   })
+  // // -----------------------------------------------
   //  const diagnosis = await prisma.diagnosis.findUnique({
   //   where: {
   //     patientId: data.patientID, 
@@ -202,8 +208,8 @@ const createSchS12Message = async (req, res) =>{
   // SCH Segment
   message.createSegment("SCH");
   message.set('SCH',{
-  // "SCH.1": data.appointmentID,
-  "SCH.1": appointmentID,
+  "SCH.1": data.appointmentID,
+  // "SCH.1": appointmentID,
   "SCH.2": data.startTime,
   "SCH.3": data.endTime,
   "SCH.4": data.duration,
@@ -247,8 +253,6 @@ const createSchS12Message = async (req, res) =>{
     });
   }
 }
-
-
 
 //ORM^O01 Message
 const createOrmO01Message = async (req, res) =>{
@@ -329,8 +333,6 @@ const createOrmO01Message = async (req, res) =>{
     });
   }
 }
-
-
 
 //ORU^R01 Message
 const createOruR01Message = async (req, res) =>{
