@@ -5,6 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  FaUserAlt,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaBriefcase,
+  FaIdCard,
+  FaClock,
+} from "react-icons/fa";
+import ScrollArea from "../../components/UI/ScrollArea";
 
 // Define the schema for validation
 const schema = z
@@ -85,124 +94,190 @@ export default function AddDoctorForm() {
       }
       title="New Doctor"
     >
-      <div className="font-manrope w-full max-w-md mx-auto mt-16">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* First Name */}
-          <TextField
-            {...register("firstName")}
-            label="First Name"
-            variant="outlined"
-            fullWidth
-            error={!!errors.firstName}
-            helperText={errors.firstName?.message}
-            sx={{ mb: 2 }}
-          />
+      <ScrollArea>
+        <div className="font-manrope w-full max-w-md mx-auto mt-2 h-[700px]">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* First Name */}
+            <TextField
+              {...register("firstName")}
+              label="First Name"
+              variant="outlined"
+              fullWidth
+              error={!!errors.firstName}
+              helperText={errors.firstName?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaUserAlt />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Last Name */}
-          <TextField
-            {...register("lastName")}
-            label="Last Name"
-            variant="outlined"
-            fullWidth
-            error={!!errors.lastName}
-            helperText={errors.lastName?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* Last Name */}
+            <TextField
+              {...register("lastName")}
+              label="Last Name"
+              variant="outlined"
+              fullWidth
+              error={!!errors.lastName}
+              helperText={errors.lastName?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaUserAlt />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Contact Number */}
-          <TextField
-            {...register("contactNumber")}
-            label="Contact Number"
-            variant="outlined"
-            fullWidth
-            error={!!errors.contactNumber}
-            helperText={errors.contactNumber?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* Contact Number */}
+            <TextField
+              {...register("contactNumber")}
+              label="Contact Number"
+              variant="outlined"
+              fullWidth
+              error={!!errors.contactNumber}
+              helperText={errors.contactNumber?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaPhoneAlt />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Degree */}
-          <TextField
-            {...register("degree")}
-            label="Degree"
-            variant="outlined"
-            fullWidth
-            error={!!errors.degree}
-            helperText={errors.degree?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* Degree */}
+            <TextField
+              {...register("degree")}
+              label="Degree"
+              variant="outlined"
+              fullWidth
+              error={!!errors.degree}
+              helperText={errors.degree?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaBriefcase />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Specialization */}
-          <TextField
-            {...register("specialization")}
-            label="Specialization"
-            variant="outlined"
-            fullWidth
-            error={!!errors.specialization}
-            helperText={errors.specialization?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* Specialization */}
+            <TextField
+              {...register("specialization")}
+              label="Specialization"
+              variant="outlined"
+              fullWidth
+              error={!!errors.specialization}
+              helperText={errors.specialization?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaIdCard />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* SSN */}
-          <TextField
-            {...register("ssn")}
-            label="SSN"
-            variant="outlined"
-            fullWidth
-            error={!!errors.ssn}
-            helperText={errors.ssn?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* SSN */}
+            <TextField
+              {...register("ssn")}
+              label="SSN"
+              variant="outlined"
+              fullWidth
+              error={!!errors.ssn}
+              helperText={errors.ssn?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaIdCard />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Working Days */}
-          <Autocomplete
-            multiple
-            options={workingDayOptions}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Working Days"
-                error={!!errors.workingDays}
-                helperText={errors.workingDays?.message}
-              />
-            )}
-            onChange={(_, value) => setValue("workingDays", value)}
-            sx={{ mb: 2 }}
-          />
+            {/* Working Days */}
+            <Autocomplete
+              multiple
+              options={workingDayOptions}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Working Days"
+                  error={!!errors.workingDays}
+                  helperText={errors.workingDays?.message}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <span className="ml-2 text-gray-400">
+                        <FaCalendarAlt />
+                      </span>
+                    ),
+                  }}
+                />
+              )}
+              onChange={(_, value) => setValue("workingDays", value)}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Shift Start Time */}
-          <TextField
-            {...register("shiftStartTime")}
-            label="Shift Start Time"
-            type="time"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            error={!!errors.shiftStartTime}
-            helperText={errors.shiftStartTime?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* Shift Start Time */}
+            <TextField
+              {...register("shiftStartTime")}
+              label="Shift Start Time"
+              type="time"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              error={!!errors.shiftStartTime}
+              helperText={errors.shiftStartTime?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaClock />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Shift End Time */}
-          <TextField
-            {...register("shiftEndTime")}
-            label="Shift End Time"
-            type="time"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            error={!!errors.shiftEndTime}
-            helperText={errors.shiftEndTime?.message}
-            sx={{ mb: 2 }}
-          />
+            {/* Shift End Time */}
+            <TextField
+              {...register("shiftEndTime")}
+              label="Shift End Time"
+              type="time"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              error={!!errors.shiftEndTime}
+              helperText={errors.shiftEndTime?.message}
+              InputProps={{
+                startAdornment: (
+                  <span className="ml-2 text-gray-400">
+                    <FaClock />
+                  </span>
+                ),
+              }}
+              sx={{ mb: 2 }}
+            />
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-500 text-white py-2 rounded-lg"
-          >
-            Add
-          </button>
-        </form>
-      </div>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-500 text-white py-2 rounded-lg"
+            >
+              Add
+            </button>
+          </form>
+        </div>
+      </ScrollArea>
     </SlidingDialog>
   );
 }
