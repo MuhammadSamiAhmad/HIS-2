@@ -43,10 +43,10 @@ This project leverages modern technologies to ensure scalability, performance, a
 
 ### Patient
 
-![Add Doctor](frontend/public/walkthrough/BookingResevation.png)
-![Add Doctor](frontend/public/walkthrough/Invoices.png)
-![Add Doctor](frontend/public/walkthrough/MedicalRecord.png)
 ![Add Doctor](frontend/public/walkthrough/PatientReservations.png)
+![Add Doctor](frontend/public/walkthrough/BookingResevation.png)
+![Add Doctor](frontend/public/walkthrough/MedicalRecord.png)
+![Add Doctor](frontend/public/walkthrough/Invoices.png)
 
 ### Doctor
 
