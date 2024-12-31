@@ -151,24 +151,6 @@ const SignInPage = () => {
           Register here!
         </span>
       </p>
-
-      {process.env.NODE_ENV === "development" && (
-        <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-          <h3 className="font-semibold mb-2">Development Test Accounts:</h3>
-          <div className="text-sm space-y-2">
-            <p>
-              Patient: {MOCK_USERS.patient.email} /{" "}
-              {MOCK_USERS.patient.password}
-            </p>
-            <p>
-              Doctor: {MOCK_USERS.doctor.email} / {MOCK_USERS.doctor.password}
-            </p>
-            <p>
-              Admin: {MOCK_USERS.admin.email} / {MOCK_USERS.admin.password}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

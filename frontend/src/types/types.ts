@@ -18,7 +18,6 @@ export type SidebarItemProps = {
   onClick?: () => void; // Optional callback for click events
 };
 
-// types/types.ts
 export type User = {
   id?: string;
   email: string;
